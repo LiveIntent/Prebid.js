@@ -7,7 +7,7 @@ Maintainer: prebid@example.com
 
 # Description
 
-Analytics adapter for Example.com. Contact prebid@example.com for information. Provided by LiveIntent
+Analytics adapter for [LiveIntent](https://www.liveintent.com/). Contact prebid@example.com for information.
 
 # Test Parameters
 
