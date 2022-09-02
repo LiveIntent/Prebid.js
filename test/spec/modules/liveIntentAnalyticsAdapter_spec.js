@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { server } from 'test/mocks/xhr.js';
 import { auctionManager } from 'src/auctionManager.js';
 
-// import { auctionManager } from 'src/auctionManager.js';
 let utils = require('src/utils');
 let instanceId = '77abbc81-c1f1-41cd-8f25-f7149244c800';
 let url = window.location.href;
