@@ -1,7 +1,8 @@
 # Overview
-
 Module Name: LiveIntent Analytics Adapter
+
 Module Type: Analytics Adapter
+
 Maintainer: prebid@example.com
 
 # Description
