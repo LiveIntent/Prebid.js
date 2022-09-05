@@ -102,14 +102,16 @@ function getBidder(bid) {
 }
 
 function getAnalyticsEventUserIds(bid) {
-  return bid.userIdAsEids.map(userId => {
-    let analyticsEventUserId = {
-      source: userId.source,
-      uids: userId.uids,
-      ext: userId.ext
-    };
-    return ignoreUndefined(analyticsEventUserId)
-  });
+  if (bid && bid.userIdAsEids) {
+    return bid.userIdAsEids.map(userId => {
+      let analyticsEventUserId = {
+        source: userId.source,
+        uids: userId.uids,
+        ext: userId.ext
+      };
+      return ignoreUndefined(analyticsEventUserId)
+    });
+  } else { return []; }
 }
 
 function sendAnalyticsEvent(data) {
