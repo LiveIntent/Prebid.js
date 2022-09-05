@@ -10,25 +10,17 @@ const url = 'https://wba.liadm.com/analytic-events';
 const gvlid = 148;
 const adapterCode = 'liveintent';
 const { EVENTS: { AUCTION_END } } = CONSTANTS;
-let initOptions = {}
+let initOptions = {};
+let isSampled;
 
 let liAnalytics = Object.assign(adapter({url, analyticsType}), {
   track({ eventType, args }) {
-    if (typeof args !== 'undefined') {
-      switch (eventType) {
-        case AUCTION_END:
-          liAnalytics.handleAuctionEnd(args);
-          break;
-        default: break;
-      }
-    }
+    if (eventType == AUCTION_END && args) { liAnalytics.handleAuctionEnd(args); }
   }
 });
 
 liAnalytics.handleAuctionEnd = function(args) {
   const bidWonTimeout = (initOptions && initOptions.bidWonTimeout) || 2000;
-  const sampling = (initOptions && initOptions.sampling) || 0.1;
-  const isSampled = Math.random() < parseFloat(sampling)
   if (isSampled) {
     setTimeout(() => {
       const auction = auctionManager.index.getAuction(args.auctionId);
@@ -145,6 +137,8 @@ liAnalytics.originEnableAnalytics = liAnalytics.enableAnalytics;
 // override enableAnalytics so we can get access to the config passed in from the page
 liAnalytics.enableAnalytics = function (config) {
   initOptions = config.options;
+  const sampling = (initOptions && initOptions.sampling) || 0.1;
+  isSampled = Math.random() < parseFloat(sampling);
   liAnalytics.originEnableAnalytics(config); // call the base class function
 };
 
