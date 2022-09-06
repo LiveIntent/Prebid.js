@@ -119,9 +119,17 @@ let args = {
   ],
   bidderRequests: [
     {
+      bidderCode: 'tripl_ss1',
+      auctionId: '8e5a5eda-a7dc-49a3-bc7f-654fc',
+      bidderRequestId: '953fe1ee8a1645',
+      uniquePbsTid: '0da1f980-8351-415d-860d-ebbdb4274179',
       auctionStart: 1660915379703
     },
     {
+      bidderCode: 'tripl_ss2',
+      auctionId: '8e5a5eda-a7dc-49a3-bc7f-6ca682ae893c',
+      bidderRequestId: '953fe1ee8a164e',
+      uniquePbsTid: '0da1f980-8351-415d-860d-ebbdb4274180',
       auctionStart: 1660915379703
     }
   ],

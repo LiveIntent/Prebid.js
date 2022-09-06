@@ -45,10 +45,12 @@ function getAnalyticsEventBids(bidsReceived) {
 }
 
 liAnalytics.getBannerSizes = function(banner) {
-  return banner.sizes.map(size => {
-    const [width, height] = size;
-    return {w: width, h: height};
-  });
+  if (banner && banner.sizes) {
+    return banner.sizes.map(size => {
+      const [width, height] = size;
+      return {w: width, h: height};
+    });
+  } else return [];
 }
 
 function getUniqueBy(arr, key) {
@@ -70,25 +72,26 @@ liAnalytics.createAnalyticsEvent = function(args, winningBids) {
   payload['userIds'] = [];
   payload['bidders'] = [];
 
-  args.adUnits.forEach(unit => {
-    if (unit.mediaTypes && unit.mediaTypes.banner) {
-      payload['adUnits'].push({
-        code: unit.code,
-        mediaType: 'banner',
-        sizes: liAnalytics.getBannerSizes(unit.mediaTypes.banner),
-        ortb2Imp: unit.ortb2Imp
-      });
-    }
-
-    let userIds = unit.bids.flatMap(getAnalyticsEventUserIds);
-    allUserIds.push(...userIds);
-
-    let bidders = unit.bids.map(getBidder);
-    payload['bidders'].push(...bidders);
-  })
-
-  let uniqueUserIds = getUniqueBy(allUserIds, 'source')
-  payload['userIds'] = uniqueUserIds
+  if (args.adUnits) {
+    args.adUnits.forEach(unit => {
+      if (unit.mediaTypes && unit.mediaTypes.banner) {
+        payload['adUnits'].push({
+          code: unit.code,
+          mediaType: 'banner',
+          sizes: liAnalytics.getBannerSizes(unit.mediaTypes.banner),
+          ortb2Imp: unit.ortb2Imp
+        });
+      }
+      if (unit.bids) {
+        let userIds = unit.bids.flatMap(getAnalyticsEventUserIds);
+        allUserIds.push(...userIds);
+        let bidders = unit.bids.map(getBidder);
+        payload['bidders'].push(...bidders);
+      }
+    })
+    let uniqueUserIds = getUniqueBy(allUserIds, 'source');
+    payload['userIds'] = uniqueUserIds;
+  }
   payload['winningBids'] = getAnalyticsEventBids(winningBids);
   payload['auctionId'] = args.auctionId;
   return payload;
