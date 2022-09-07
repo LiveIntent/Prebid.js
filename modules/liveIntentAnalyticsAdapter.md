@@ -3,11 +3,11 @@ Module Name: LiveIntent Analytics Adapter
 
 Module Type: Analytics Adapter
 
-Maintainer: tam@liveintenteng.com
+Maintainer: product@liveintent.com
 
 # Description
 
-Analytics adapter for [LiveIntent](https://www.liveintent.com/). Contact tam@liveintenteng.com for information.
+Analytics adapter for [LiveIntent](https://www.liveintent.com/). Contact product@liveintent.com for information.
 
 # Test Parameters
 

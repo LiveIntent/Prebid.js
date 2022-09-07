@@ -1,5 +1,5 @@
 import {ajax} from '../src/ajax.js';
-import { generateUUID, logInfo } from '../src/utils.js';
+import { generateUUID, logInfo, logWarn } from '../src/utils.js';
 import adapter from '../libraries/analyticsAdapter/AnalyticsAdapter.js';
 import CONSTANTS from '../src/constants.json';
 import adapterManager from '../src/adapterManager.js';
@@ -16,17 +16,11 @@ let initOptions = {};
 let isSampled;
 let bidWonTimeout;
 
-let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
-  track({ eventType, args }) {
-    if (eventType == AUCTION_END && args && isSampled) { liAnalytics.handleAuctionEnd(args); }
-  }
-});
-
-liAnalytics.handleAuctionEnd = function(args) {
+function handleAuctionEnd(args) {
   setTimeout(() => {
     const auction = auctionManager.index.getAuction(args.auctionId);
     const winningBids = (auction) ? auction.getWinningBids() : [];
-    const data = liAnalytics.createAnalyticsEvent(args, winningBids);
+    const data = createAnalyticsEvent(args, winningBids);
     sendAnalyticsEvent(data);
   }, bidWonTimeout);
 }
@@ -44,7 +38,7 @@ function getAnalyticsEventBids(bidsReceived) {
   });
 }
 
-liAnalytics.getBannerSizes = function(banner) {
+function getBannerSizes(banner) {
   if (banner && banner.sizes) {
     return banner.sizes.map(size => {
       const [width, height] = size;
@@ -57,20 +51,18 @@ function getUniqueBy(arr, key) {
   return [...new Map(arr.map(item => [item[key], item])).values()]
 }
 
-liAnalytics.createAnalyticsEvent = function(args, winningBids) {
-  let payload = {}
+function createAnalyticsEvent(args, winningBids) {
+  let payload = {
+    instanceId: generateUUID(),
+    url: window.location.href,
+    bidsReceived: getAnalyticsEventBids(args.bidsReceived),
+    auctionStart: args.timestamp,
+    auctionEnd: args.auctionEnd,
+    adUnits: [],
+    userIds: [],
+    bidders: []
+  }
   let allUserIds = [];
-
-  payload['instanceId'] = generateUUID();
-  payload['url'] = window.location.href;
-  payload['bidsReceived'] = getAnalyticsEventBids(args.bidsReceived);
-
-  payload['auctionStart'] = args.timestamp;
-  payload['auctionEnd'] = args.auctionEnd;
-
-  payload['adUnits'] = [];
-  payload['userIds'] = [];
-  payload['bidders'] = [];
 
   if (args.adUnits) {
     args.adUnits.forEach(unit => {
@@ -78,14 +70,17 @@ liAnalytics.createAnalyticsEvent = function(args, winningBids) {
         payload['adUnits'].push({
           code: unit.code,
           mediaType: 'banner',
-          sizes: liAnalytics.getBannerSizes(unit.mediaTypes.banner),
+          sizes: getBannerSizes(unit.mediaTypes.banner),
           ortb2Imp: unit.ortb2Imp
         });
       }
       if (unit.bids) {
         let userIds = unit.bids.flatMap(getAnalyticsEventUserIds);
         allUserIds.push(...userIds);
-        let bidders = unit.bids.map(getBidder);
+        let bidders = unit.bids.map(({bidder, params}) => {
+          return { bidder, params }
+        });
+
         payload['bidders'].push(...bidders);
       }
     })
@@ -97,21 +92,10 @@ liAnalytics.createAnalyticsEvent = function(args, winningBids) {
   return payload;
 }
 
-function getBidder(bid) {
-  return {
-    bidder: bid.bidder,
-    params: bid.params
-  };
-}
-
 function getAnalyticsEventUserIds(bid) {
   if (bid && bid.userIdAsEids) {
-    return bid.userIdAsEids.map(userId => {
-      let analyticsEventUserId = {
-        source: userId.source,
-        uids: userId.uids,
-        ext: userId.ext
-      };
+    return bid.userIdAsEids.map(({source, uids, ext}) => {
+      let analyticsEventUserId = {source, uids, ext};
       return ignoreUndefined(analyticsEventUserId)
     });
   } else { return []; }
@@ -123,7 +107,7 @@ function sendAnalyticsEvent(data) {
       logInfo('LiveIntent Prebid Analytics: send data success');
     },
     error: function (e) {
-      logInfo('LiveIntent Prebid Analytics: send data error' + e);
+      logWarn('LiveIntent Prebid Analytics: send data error' + e);
     }
   }, JSON.stringify(data), {
     contentType: 'application/json',
@@ -135,6 +119,12 @@ function ignoreUndefined(data) {
   const filteredData = Object.entries(data).filter(([key, value]) => value)
   return Object.fromEntries(filteredData)
 }
+
+let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
+  track({ eventType, args }) {
+    if (eventType == AUCTION_END && args && isSampled) { handleAuctionEnd(args); }
+  }
+});
 
 // save the base class function
 liAnalytics.originEnableAnalytics = liAnalytics.enableAnalytics;

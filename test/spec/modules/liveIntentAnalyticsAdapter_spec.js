@@ -271,10 +271,10 @@ describe('LiveIntent Analytics Adapter ', () => {
     clock.restore();
   });
 
-  it('request is sent correctly', () => {
+  it('request is computed and sent correctly', () => {
     liAnalytics.enableAnalytics(config);
     sandbox.stub(utils, 'generateUUID').returns(instanceId);
-    sandbox.stub(auctionManager.index, 'getAuction').withArgs(auctionId).returns({ getWinningBids: () => winningBids })
+    sandbox.stub(auctionManager.index, 'getAuction').withArgs(auctionId).returns({ getWinningBids: () => winningBids });
     events.emit(constants.EVENTS.AUCTION_END, args);
     clock.tick(2000);
     expect(server.requests.length).to.equal(1);
@@ -283,35 +283,13 @@ describe('LiveIntent Analytics Adapter ', () => {
     expect(requestBody).to.deep.equal(expectedEvent);
   });
 
-  it('calls handleAuctionEnd when an AUCTION_END event is received', () => {
+  it('track is called', () => {
     liAnalytics.enableAnalytics(config);
-    sandbox.stub(liAnalytics, 'handleAuctionEnd');
+    sandbox.stub(liAnalytics, 'track');
     events.emit(constants.EVENTS.AUCTION_END, args);
-    sandbox.assert.calledOnce(liAnalytics.handleAuctionEnd);
-  });
-
-  it('not call handleAuctionEnd when another event type is received', () => {
-    liAnalytics.enableAnalytics(config);
-    sandbox.stub(liAnalytics, 'handleAuctionEnd');
-    events.emit(constants.EVENTS.BID_TIMEOUT, args);
-    sandbox.assert.notCalled(liAnalytics.handleAuctionEnd);
-  });
-
-  it('extract sizes', () => {
-    let expectedResult = [{
-      w: 100,
-      h: 50
-    }];
-    let banner = {
-      sizes: [
-        [100, 50]
-      ]
-    };
-    expect(liAnalytics.getBannerSizes(banner)).to.deep.equal(expectedResult);
-  });
-
-  it('creates analytics event from args and winning bids', () => {
-    sandbox.stub(utils, 'generateUUID').returns(instanceId)
-    expect(liAnalytics.createAnalyticsEvent(args, winningBids)).to.deep.equal(expectedEvent);
-  });
+    events.emit(constants.EVENTS.AUCTION_END, args);
+    events.emit(constants.EVENTS.AUCTION_END, args);
+    clock.tick(6000);
+    sinon.assert.callCount(liAnalytics.track, 3)
+  })
 });
