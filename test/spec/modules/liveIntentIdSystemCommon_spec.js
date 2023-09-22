@@ -93,4 +93,32 @@ describe('LiveIntentId eids conversion', function() {
       uids: [{id: 'some-random-id-value', atype: 3, ext: {provider: 'liveintent.com'}}]
     });
   });
+
+  it('openx', function() {
+    const userId = {
+      openx: {
+        id: 'some-random-id-value',
+      }
+    };
+    const newEids = createEidsArray(userId);
+    expect(newEids.length).to.equal(1);
+    expect(newEids[0]).to.deep.equal({
+      source: 'openx.com',
+      uids: [{id: 'some-random-id-value', atype: 3, ext: {provider: 'liveintent.com'}}]
+    });
+  });
+
+  it('pubmatic', function() {
+    const userId = {
+      pubmatic: {
+        id: 'some-random-id-value',
+      }
+    };
+    const newEids = createEidsArray(userId);
+    expect(newEids.length).to.equal(1);
+    expect(newEids[0]).to.deep.equal({
+      source: 'KADUSERCOOKIE',
+      uids: [{id: 'some-random-id-value', atype: 3, ext: {provider: 'liveintent.com'}}]
+    });
+  });
 });

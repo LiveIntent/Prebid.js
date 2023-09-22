@@ -214,7 +214,7 @@ export const liveIntentIdSubmodule = {
       }
 
       if (value.pubmatic) {
-        result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.pubmatic = { 'id': value.pubmatic }
       }
 
       return result
@@ -320,7 +320,7 @@ export const liveIntentIdSubmodule = {
         return { provider: LI_PROVIDER_DOMAIN };
       }
     },
-    'openx': {
+    'pubmatic': {
       source: 'KADUSERCOOKIE',
       atype: 3,
       getValue: function(data) {
