@@ -230,7 +230,7 @@ describe('LiveIntentMinimalId', function() {
     );
     expect(callBackSpy.calledOnce).to.be.true;
   });
-  
+
   it('should allow disabling nonId resolution', function() {
     let callBackSpy = sinon.spy();
     let submoduleCallback = liveIntentIdSubmodule.getId({ params: {
