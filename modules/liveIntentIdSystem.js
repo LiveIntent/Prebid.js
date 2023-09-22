@@ -190,27 +190,27 @@ export const liveIntentIdSubmodule = {
       // As adapters are applied in lexicographical order, we will always
       // be overwritten by the 'proper' uid2 module if it is present.
       if (value.uid2) {
-        result.uid2 = { 'id': value.uid2, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.uid2 = { 'id': value.uid2 }
       }
 
       if (value.bidswitch) {
-        result.bidswitch = { 'id': value.bidswitch, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.bidswitch = { 'id': value.bidswitch }
       }
 
       if (value.medianet) {
-        result.medianet = { 'id': value.medianet, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.medianet = { 'id': value.medianet }
       }
 
       if (value.magnite) {
-        result.magnite = { 'id': value.magnite, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.magnite = { 'id': value.magnite }
       }
 
       if (value.index) {
-        result.index = { 'id': value.index, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.index = { 'id': value.index }
       }
 
       if (value.openx) {
-        result.openx = { 'id': value.openx, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.openx = { 'id': value.openx }
       }
 
       return result
@@ -273,9 +273,7 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        if (data.ext) {
-          return data.ext;
-        }
+        return { provider: LI_PROVIDER_DOMAIN };
       }
     },
     'medianet': {
@@ -285,9 +283,7 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        if (data.ext) {
-          return data.ext;
-        }
+        return { provider: LI_PROVIDER_DOMAIN };
       }
     },
     'magnite': {
@@ -297,9 +293,7 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        if (data.ext) {
-          return data.ext;
-        }
+        return { provider: LI_PROVIDER_DOMAIN };
       }
     },
     'index': {
@@ -309,9 +303,17 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        if (data.ext) {
-          return data.ext;
-        }
+        return { provider: LI_PROVIDER_DOMAIN };
+      }
+    },
+    'uid2': {
+      source: 'uidapi.com',
+      atype: 3,
+      getValue: function(data) {
+        return data.id;
+      },
+      getUidExt: function(data) {
+        return { provider: LI_PROVIDER_DOMAIN };
       }
     }
   }
