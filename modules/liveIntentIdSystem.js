@@ -213,6 +213,10 @@ export const liveIntentIdSubmodule = {
         result.openx = { 'id': value.openx }
       }
 
+      if (value.pubmatic) {
+        result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } }
+      }
+
       return result
     }
 
@@ -298,6 +302,26 @@ export const liveIntentIdSubmodule = {
     },
     'index': {
       source: 'liveintent.indexexchange.com',
+      atype: 3,
+      getValue: function(data) {
+        return data.id;
+      },
+      getUidExt: function(data) {
+        return { provider: LI_PROVIDER_DOMAIN };
+      }
+    },
+    'openx': {
+      source: 'openx.com',
+      atype: 3,
+      getValue: function(data) {
+        return data.id;
+      },
+      getUidExt: function(data) {
+        return { provider: LI_PROVIDER_DOMAIN };
+      }
+    },
+    'openx': {
+      source: 'KADUSERCOOKIE',
       atype: 3,
       getValue: function(data) {
         return data.id;
