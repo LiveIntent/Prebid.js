@@ -191,31 +191,31 @@ export const liveIntentIdSubmodule = {
       // As adapters are applied in lexicographical order, we will always
       // be overwritten by the 'proper' uid2 module if it is present.
       if (value.uid2) {
-        result.uid2 = { 'id': value.uid2 }
+        result.uid2 = { 'id': value.uid2, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.bidswitch) {
-        result.bidswitch = { 'id': value.bidswitch }
+        result.bidswitch = { 'id': value.bidswitch, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.medianet) {
-        result.medianet = { 'id': value.medianet }
+        result.medianet = { 'id': value.medianet, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.magnite) {
-        result.magnite = { 'id': value.magnite }
+        result.magnite = { 'id': value.magnite, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.index) {
-        result.index = { 'id': value.index }
+        result.index = { 'id': value.index, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.openx) {
-        result.openx = { 'id': value.openx }
+        result.openx = { 'id': value.openx, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       if (value.pubmatic) {
-        result.pubmatic = { 'id': value.pubmatic }
+        result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       return result
@@ -278,7 +278,9 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     },
     'medianet': {
@@ -288,7 +290,9 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     },
     'magnite': {
@@ -298,7 +302,9 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     },
     'index': {
@@ -308,7 +314,9 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     },
     'openx': {
@@ -318,27 +326,21 @@ export const liveIntentIdSubmodule = {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     },
     'pubmatic': {
-      source: 'KADUSERCOOKIE',
+      source: 'pubmatic.com',
       atype: 3,
       getValue: function(data) {
         return data.id;
       },
       getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
-      }
-    },
-    'uid2': {
-      source: 'uidapi.com',
-      atype: 3,
-      getValue: function(data) {
-        return data.id;
-      },
-      getUidExt: function(data) {
-        return { provider: LI_PROVIDER_DOMAIN };
+        if (data.ext) {
+          return data.ext;
+        }
       }
     }
   }

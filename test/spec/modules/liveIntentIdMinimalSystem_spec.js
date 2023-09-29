@@ -32,7 +32,6 @@ describe('LiveIntentMinimalId', function() {
     logErrorStub.restore();
     uspConsentDataStub.restore();
     gdprConsentDataStub.restore();
-    liveIntentIdSubmodule.setModuleMode('minimal');
     resetLiveIntentIdSubmodule();
   });
   it('should not fire an event when getId', function() {
