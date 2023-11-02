@@ -12,6 +12,7 @@ describe('LiveIntentId', function() {
   let logErrorStub;
   let uspConsentDataStub;
   let gdprConsentDataStub;
+  let gppConsentDataStub;
   let getCookieStub;
   let getDataFromLocalStorageStub;
   let imgStub;
