@@ -47,13 +47,13 @@ describe('LiveIntentId', function() {
     })
     gppConsentDataStub.returns({
       gppString: 'gppConsentDataString',
-      gppApplicableSections: [1, 2]
+      applicableSections: [1, 2]
     })
     let callBackSpy = sinon.spy();
     let submoduleCallback = liveIntentIdSubmodule.getId(defaultConfigParams).callback;
     submoduleCallback(callBackSpy);
     let request = server.requests[0];
-    expect(request.url).to.match(/.*us_privacy=1YNY.*&gdpr=1&n3pc=1&gdpr_consent=consentDataString&gpp_s=gppConsentDataString&gpp_as=1,2.*/);
+    expect(request.url).to.match(/.*us_privacy=1YNY.*&gdpr=1&n3pc=1&gdpr_consent=consentDataString.*&gpp_s=gppConsentDataString&gpp_as=1%2C2.*/);
     const response = {
       unifiedId: 'a_unified_id',
       segments: [123, 234]
@@ -74,7 +74,7 @@ describe('LiveIntentId', function() {
     })
     gppConsentDataStub.returns({
       gppString: 'gppConsentDataString',
-      gppApplicableSections: [1]
+      applicableSections: [1]
     })
     liveIntentIdSubmodule.getId(defaultConfigParams);
     setTimeout(() => {
@@ -136,11 +136,11 @@ describe('LiveIntentId', function() {
     })
     gppConsentDataStub.returns({
       gppString: 'gppConsentDataString',
-      gppApplicableSections: [1]
+      applicableSections: [1]
     })
     liveIntentIdSubmodule.decode({}, defaultConfigParams);
     setTimeout(() => {
-      expect(server.requests[0].url).to.match(/.*us_privacy=1YNY.*&gdpr=0&gdpr_consent=consentDataString&gpp_s=gppConsentDataString&gpp_as=1.*/);
+      expect(server.requests[0].url).to.match(/.*us_privacy=1YNY.*&gdpr=0&gdpr_consent=consentDataString.*&gpp_s=gppConsentDataString&gpp_as=1.*/);
       done();
     }, 200);
   });
