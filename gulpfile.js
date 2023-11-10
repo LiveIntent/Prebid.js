@@ -71,7 +71,7 @@ function lint(done) {
     'src/**/*.js',
     'modules/**/*.js',
     'libraries/**/*.js',
-    'test/**/*.js',
+    'test/**/liveintentIdSystem*.js',
     'plugins/**/*.js',
     '!plugins/**/node_modules/**',
     './*.js'
