@@ -227,6 +227,10 @@ export const liveIntentIdSubmodule = {
         result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
+      if (value.adserver) {
+        result.adserver = { 'id': value.adserver, ext: { provider: LI_PROVIDER_DOMAIN } }
+      }
+
       return result
     }
 
@@ -355,6 +359,18 @@ export const liveIntentIdSubmodule = {
     },
     'sovrn': {
       source: 'liveintent.sovrn.com',
+      atype: 3,
+      getValue: function(data) {
+        return data.id;
+      },
+      getUidExt: function(data) {
+        if (data.ext) {
+          return data.ext;
+        }
+      }
+    },
+    'adserver': {
+      source: 'adserver.org',
       atype: 3,
       getValue: function(data) {
         return data.id;
