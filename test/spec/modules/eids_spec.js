@@ -403,9 +403,9 @@ describe('eids array generation for known sub-modules', function() {
     });
   });
 
-  it('adserver', function() {
+  it('thetradedesk', function() {
     const userId = {
-      adserver: {'id': 'sample_id'}
+      thetradedesk: {'id': 'sample_id'}
     };
     const newEids = createEidsArray(userId);
     expect(newEids.length).to.equal(1);
@@ -418,9 +418,9 @@ describe('eids array generation for known sub-modules', function() {
     });
   });
 
-  it('adserver with ext', function() {
+  it('thetradedesk with ext', function() {
     const userId = {
-      adserver: {'id': 'sample_id', 'ext': {'provider': 'some.provider.com'}}
+      thetradedesk: {'id': 'sample_id', 'ext': {'provider': 'some.provider.com'}}
     };
     const newEids = createEidsArray(userId);
     expect(newEids.length).to.equal(1);

@@ -227,8 +227,8 @@ export const liveIntentIdSubmodule = {
         result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
-      if (value.adserver) {
-        result.adserver = { 'id': value.adserver, ext: { provider: LI_PROVIDER_DOMAIN } }
+      if (value.thetradedesk) {
+        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       return result
@@ -369,7 +369,7 @@ export const liveIntentIdSubmodule = {
         }
       }
     },
-    'adserver': {
+    'thetradedesk': {
       source: 'adserver.org',
       atype: 3,
       getValue: function(data) {

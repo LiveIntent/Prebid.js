@@ -413,9 +413,9 @@ describe('LiveIntentId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubmatic': 'bar'}, 'pubmatic': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
-  it('should decode an adserver id to a seperate object when present', function() {
-    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', adserver: 'bar' });
-    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'adserver': 'bar'}, 'adserver': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  it('should decode a thetradedesk id to a seperate object when present', function() {
+    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
   it('should allow disabling nonId resolution', function() {
