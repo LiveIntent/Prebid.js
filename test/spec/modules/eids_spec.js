@@ -297,6 +297,39 @@ describe('eids array generation for known sub-modules', function() {
     });
   });
 
+  it('thetradedesk', function() {
+    const userId = {
+      thetradedesk: {'id': 'sample_id'}
+    };
+    const newEids = createEidsArray(userId);
+    expect(newEids.length).to.equal(1);
+    expect(newEids[0]).to.deep.equal({
+      source: 'adserver.org',
+      uids: [{
+        id: 'sample_id',
+        atype: 3
+      }]
+    });
+  });
+
+  it('thetradedesk with ext', function() {
+    const userId = {
+      thetradedesk: {'id': 'sample_id', 'ext': {'provider': 'some.provider.com'}}
+    };
+    const newEids = createEidsArray(userId);
+    expect(newEids.length).to.equal(1);
+    expect(newEids[0]).to.deep.equal({
+      source: 'adserver.org',
+      uids: [{
+        id: 'sample_id',
+        atype: 3,
+        ext: {
+          provider: 'some.provider.com'
+        }
+      }]
+    });
+  });
+
   it('britepoolId', function() {
     const userId = {
       britepoolid: 'some-random-id-value'

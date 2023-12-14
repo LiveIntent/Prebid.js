@@ -146,6 +146,14 @@ userIdAsEids = [
         }]
     },
 
+   {
+        source: 'adserver.org',
+        uids: [{
+            id: 'some-random-id-value',
+            atype: 3
+        }]
+    },
+    
     {
         source: 'merkleinc.com',
         uids: [{

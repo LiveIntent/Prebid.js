@@ -388,6 +388,11 @@ describe('LiveIntentId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sovrn': 'bar'}, 'sovrn': {'id': 'bar'}});
   });
 
+  it('should decode a thetradedesk id to a seperate object when present', function() {
+    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar'}});
+  });
+
   it('should decode a magnite id to a seperate object when present', function() {
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', magnite: 'bar' });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'magnite': 'bar'}, 'magnite': {'id': 'bar'}});

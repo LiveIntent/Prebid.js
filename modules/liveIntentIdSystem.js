@@ -217,6 +217,10 @@ export const liveIntentIdSubmodule = {
         result.sovrn = { 'id': value.sovrn }
       }
 
+      if (value.thetradedesk) {
+        result.thetradedesk = { 'id': value.thetradedesk }
+      }
+
       return result
     }
 
