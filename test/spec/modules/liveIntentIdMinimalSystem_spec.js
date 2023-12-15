@@ -268,7 +268,7 @@ describe('LiveIntentMinimalId', function() {
 
   it('should decode a thetradedesk id to a separate object when present', function() {
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' });
-    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar'}, 'ext': {'provider': 'liveintent.com'}});
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
   it('should allow disabling nonId resolution', function() {
