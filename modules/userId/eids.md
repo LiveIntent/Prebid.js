@@ -150,7 +150,10 @@ userIdAsEids = [
         source: 'adserver.org',
         uids: [{
             id: 'some-random-id-value',
-            atype: 3
+            atype: 3,
+            ext: {
+                provider: 'liveintent.com'
+            }
         }]
     },
     

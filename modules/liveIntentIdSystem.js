@@ -14,6 +14,7 @@ import {MODULE_TYPE_UID} from '../src/activities/modules.js';
 
 const EVENTS_TOPIC = 'pre_lips'
 const MODULE_NAME = 'liveIntentId';
+const LI_PROVIDER_DOMAIN = 'liveintent.com';
 export const storage = getStorageManager({moduleType: MODULE_TYPE_UID, moduleName: MODULE_NAME});
 const defaultRequestedAttributes = {'nonId': true}
 const calls = {
@@ -218,7 +219,7 @@ export const liveIntentIdSubmodule = {
       }
 
       if (value.thetradedesk) {
-        result.thetradedesk = { 'id': value.thetradedesk }
+        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       return result
