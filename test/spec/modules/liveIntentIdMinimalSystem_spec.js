@@ -2,6 +2,7 @@ import * as utils from 'src/utils.js';
 import { gdprDataHandler, uspDataHandler } from '../../../src/adapterManager.js';
 import { server } from 'test/mocks/xhr.js';
 import { liveIntentIdSubmodule, reset as resetLiveIntentIdSubmodule, storage } from 'modules/liveIntentIdSystem.js';
+import * as refererDetection from '../../../src/refererDetection.js';
 
 const PUBLISHER_ID = '89899';
 const defaultConfigParams = { params: {publisherId: PUBLISHER_ID} };
@@ -14,6 +15,7 @@ describe('LiveIntentMinimalId', function() {
   let getCookieStub;
   let getDataFromLocalStorageStub;
   let imgStub;
+  let refererInfoStub;
 
   beforeEach(function() {
     liveIntentIdSubmodule.setModuleMode('minimal');
@@ -23,6 +25,7 @@ describe('LiveIntentMinimalId', function() {
     logErrorStub = sinon.stub(utils, 'logError');
     uspConsentDataStub = sinon.stub(uspDataHandler, 'getConsentData');
     gdprConsentDataStub = sinon.stub(gdprDataHandler, 'getConsentData');
+    refererInfoStub = sinon.stub(refererDetection, 'getRefererInfo');
   });
 
   afterEach(function() {
@@ -32,6 +35,7 @@ describe('LiveIntentMinimalId', function() {
     logErrorStub.restore();
     uspConsentDataStub.restore();
     gdprConsentDataStub.restore();
+    refererInfoStub.restore();
     liveIntentIdSubmodule.setModuleMode('minimal');
     resetLiveIntentIdSubmodule();
   });
@@ -266,19 +270,21 @@ describe('LiveIntentMinimalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sovrn': 'bar'}, 'sovrn': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
-  it('should decode a openx id to a seperate object when present', function() {
+  it('should decode a openx id to a separate object when present', function() {
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', openx: 'bar' });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'openx': 'bar'}, 'openx': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
-  it('should decode a pubmatic id to a seperate object when present', function() {
+  it('should decode a pubmatic id to a separate object when present', function() {
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', pubmatic: 'bar' });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubmatic': 'bar'}, 'pubmatic': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
   it('should decode a thetradedesk id to a separate object when present', function() {
+    const provider = 'liveintent.com'
+    refererInfoStub.returns({domain: provider})
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' });
-    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar', 'ext': {'provider': provider}}});
   });
 
   it('should allow disabling nonId resolution', function() {
