@@ -12,6 +12,7 @@ import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../src/adapterM
 import {getStorageManager} from '../src/storageManager.js';
 import {MODULE_TYPE_UID} from '../src/activities/modules.js';
 import {UID2_EIDS} from '../libraries/uid2Eids/uid2Eids.js';
+import { getRefererInfo } from '../src/refererDetection.js';
 
 const DEFAULT_AJAX_TIMEOUT = 5000
 const EVENTS_TOPIC = 'pre_lips'
@@ -228,7 +229,7 @@ export const liveIntentIdSubmodule = {
       }
 
       if (value.thetradedesk) {
-        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: getRefererInfo().domain || LI_PROVIDER_DOMAIN } }
       }
 
       return result
