@@ -281,7 +281,7 @@ describe('LiveIntentMinimalId', function() {
   });
 
   it('should decode a thetradedesk id to a separate object when present', function() {
-    const provider = 'liveintent.com'
+    const provider = 'example.com'
     refererInfoStub.returns({domain: provider})
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'thetradedesk': 'bar'}, 'thetradedesk': {'id': 'bar', 'ext': {'provider': provider}}});

@@ -11,6 +11,7 @@ import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/val
 import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../src/adapterManager.js';
 import {getStorageManager} from '../src/storageManager.js';
 import {MODULE_TYPE_UID} from '../src/activities/modules.js';
+import { getRefererInfo } from '../src/refererDetection.js';
 
 const EVENTS_TOPIC = 'pre_lips'
 const MODULE_NAME = 'liveIntentId';
@@ -227,7 +228,7 @@ export const liveIntentIdSubmodule = {
       }
 
       if (value.thetradedesk) {
-        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.thetradedesk = { 'id': value.thetradedesk, ext: { provider: getRefererInfo().domain || LI_PROVIDER_DOMAIN } }
       }
 
       return result
