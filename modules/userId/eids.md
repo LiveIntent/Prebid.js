@@ -335,6 +335,13 @@ userIdAsEids = [
             id: 'some-random-id-value',
             atype: 3
         }]
+    },
+    {
+        source: 'mygaru.com',
+        uids: [{
+            id: 'some-random-id-value',
+            atype: 1
+        }]
     }
 ]
 ```
