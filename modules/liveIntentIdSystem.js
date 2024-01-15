@@ -194,9 +194,8 @@ export const liveIntentIdSubmodule = {
       // old versions stored lipbid in unifiedId. Ensure that we can still read the data.
       const lipbid = value.nonId || value.unifiedId
       if (lipbid) {
-        value.lipbid = lipbid
-        delete value.unifiedId
-        result.lipb = value
+        result.lipb = { ...value, lipbid }
+        delete result.lipb.unifiedId
       }
 
       // Lift usage of uid2 by exposing uid2 if we were asked to resolve it.
@@ -232,6 +231,13 @@ export const liveIntentIdSubmodule = {
 
       if (value.sovrn) {
         result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } }
+      }
+
+      if (value.idcookie && !coppaDataHandler.getCoppa()) {
+        result.lipb.pubcid = value.idcookie
+        delete result.lipb.idcookie
+
+        result.pubcid = { 'id': value.idcookie, ext: { provider: LI_PROVIDER_DOMAIN } }
       }
 
       return result
