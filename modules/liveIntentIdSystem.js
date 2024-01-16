@@ -84,8 +84,15 @@ function parseLiveIntentCollectorConfig(collectConfig) {
  * @returns {Array}
  */
 function parseRequestedAttributes(overrides) {
+  function renameAttribute(attribute) {
+    if (attribute === 'sharedId') {
+      return 'idcookie'
+    } else {
+      return attribute
+    }
+  }
   function createParameterArray(config) {
-    return Object.entries(config).flatMap(([k, v]) => (typeof v === 'boolean' && v) ? [k] : []);
+    return Object.entries(config).flatMap(([k, v]) => (typeof v === 'boolean' && v) ? [renameAttribute(k)] : []);
   }
   if (typeof overrides === 'object') {
     return createParameterArray({...defaultRequestedAttributes, ...overrides})
@@ -125,6 +132,13 @@ function initializeLiveConnect(configParams) {
   liveConnectConfig.identityResolutionConfig = identityResolutionConfig;
   liveConnectConfig.identifiersToResolve = configParams.identifiersToResolve || [];
   liveConnectConfig.fireEventDelay = configParams.fireEventDelay;
+
+  liveConnectConfig.idCookie = {}
+  const sharedIdConfig = configParams.sharedId || {}
+  liveConnectConfig.idCookie.mode = sharedIdConfig.mode || 'generated'
+  liveConnectConfig.idCookie.name = sharedIdConfig.name
+  liveConnectConfig.idCookie.strategy = sharedIdConfig.strategy
+
   const usPrivacyString = uspDataHandler.getConsentData();
   if (usPrivacyString) {
     liveConnectConfig.usPrivacyString = usPrivacyString;
@@ -189,7 +203,7 @@ export const liveIntentIdSubmodule = {
   decode(value, config) {
     const configParams = (config && config.params) || {};
     function composeIdObject(value) {
-      const result = {};
+      const result = {  };
 
       // old versions stored lipbid in unifiedId. Ensure that we can still read the data.
       const lipbid = value.nonId || value.unifiedId
@@ -234,7 +248,7 @@ export const liveIntentIdSubmodule = {
       }
 
       if (value.idcookie && !coppaDataHandler.getCoppa()) {
-        result.lipb.pubcid = value.idcookie
+        result.lipb = { ...result.lipb, pubcid: value.idcookie }
         delete result.lipb.idcookie
 
         result.pubcid = { 'id': value.idcookie, ext: { provider: LI_PROVIDER_DOMAIN } }
