@@ -114,7 +114,6 @@ function initializeLiveConnect(configParams) {
   }
 
   identityResolutionConfig.ajaxTimeout = configParams.ajaxTimeout || DEFAULT_AJAX_TIMEOUT
-  identityResolutionConfig.idCookieMode = sharedIdConfig.mode
 
   const liveConnectConfig = parseLiveIntentCollectorConfig(configParams.liCollectConfig);
 
