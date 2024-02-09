@@ -27,7 +27,7 @@ describe('LiveIntentId', function() {
     uspConsentDataStub = sinon.stub(uspDataHandler, 'getConsentData');
     gdprConsentDataStub = sinon.stub(gdprDataHandler, 'getConsentData');
     gppConsentDataStub = sinon.stub(gppDataHandler, 'getConsentData');
-    coppaConsentDataStub = sinon.stub(coppaDataHandler, 'getConsentData');
+    coppaConsentDataStub = sinon.stub(coppaDataHandler, 'getCoppa');
   });
 
   afterEach(function() {
@@ -452,6 +452,6 @@ describe('LiveIntentId', function() {
   it('should not decode a idcookie as sharedId if it exists and coppa is true', function() {
     coppaConsentDataStub.returns(true)
     const result = liveIntentIdSubmodule.decode({nonId: 'foo', idcookie: 'bar'})
-    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubcid': 'bar'}, 'pubcid': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}})
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo'}})
   });
 })
