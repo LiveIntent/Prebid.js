@@ -12,6 +12,7 @@ import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../src/adapterM
 import {getStorageManager} from '../src/storageManager.js';
 import {MODULE_TYPE_UID} from '../src/activities/modules.js';
 import {UID2_EIDS} from '../libraries/uid2Eids/uid2Eids.js';
+import {PUBCID_EIDS} from '../libraries/pubcidEids/pubcidEids.js';
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule
@@ -297,6 +298,7 @@ export const liveIntentIdSubmodule = {
   },
   eids: {
     ...UID2_EIDS,
+    ...PUBCID_EIDS,
     'lipb': {
       getValue: function(data) {
         return data.lipbid;
