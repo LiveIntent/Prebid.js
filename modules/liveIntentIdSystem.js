@@ -8,11 +8,11 @@ import { triggerPixel, logError } from '../src/utils.js';
 import { ajaxBuilder } from '../src/ajax.js';
 import { submodule } from '../src/hook.js';
 import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/validate-imports
-import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../src/adapterManager.js';
-import {getStorageManager} from '../src/storageManager.js';
-import {MODULE_TYPE_UID} from '../src/activities/modules.js';
-import {UID2_EIDS} from '../libraries/uid2Eids/uid2Eids.js';
-import {PUBCID_EIDS} from '../libraries/pubcidEids/pubcidEids.js';
+import { gdprDataHandler, uspDataHandler, gppDataHandler, coppaDataHandler } from '../src/adapterManager.js';
+import { getStorageManager } from '../src/storageManager.js';
+import { MODULE_TYPE_UID } from '../src/activities/modules.js';
+import { UID2_EIDS } from '../libraries/uid2Eids/uid2Eids.js';
+import { PUBCID_EIDS } from '../libraries/pubcidEids/pubcidEids.js';
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule
@@ -20,12 +20,12 @@ import {PUBCID_EIDS} from '../libraries/pubcidEids/pubcidEids.js';
  * @typedef {import('../modules/userId/index.js').IdResponse} IdResponse
  */
 
-const DEFAULT_AJAX_TIMEOUT = 5000
-const EVENTS_TOPIC = 'pre_lips'
+const DEFAULT_AJAX_TIMEOUT = 5000;
+const EVENTS_TOPIC = 'pre_lips';
 const MODULE_NAME = 'liveIntentId';
 const LI_PROVIDER_DOMAIN = 'liveintent.com';
 export const storage = getStorageManager({moduleType: MODULE_TYPE_UID, moduleName: MODULE_NAME});
-const defaultRequestedAttributes = {'nonId': true}
+const defaultRequestedAttributes = {'nonId': true};
 const calls = {
   ajaxGet: (url, onSuccess, onError, timeout) => {
     ajaxBuilder(timeout)(
@@ -52,10 +52,10 @@ let liveConnect = null;
  */
 export function reset() {
   if (window && window.liQ_instances) {
-    window.liQ_instances.forEach(i => i.eventBus.off(EVENTS_TOPIC, setEventFiredFlag))
+    window.liQ_instances.forEach(i => i.eventBus.off(EVENTS_TOPIC, setEventFiredFlag));
     window.liQ_instances = [];
   }
-  liveIntentIdSubmodule.setModuleMode(null)
+  liveIntentIdSubmodule.setModuleMode(null);
   eventFired = false;
   liveConnect = null;
 }
@@ -69,7 +69,7 @@ export function setEventFiredFlag() {
 
 function parseLiveIntentCollectorConfig(collectConfig) {
   const config = {};
-  collectConfig = collectConfig || {}
+  collectConfig = collectConfig || {};
   collectConfig.appId && (config.appId = collectConfig.appId);
   collectConfig.fpiStorageStrategy && (config.storageStrategy = collectConfig.fpiStorageStrategy);
   collectConfig.fpiExpirationDays && (config.expirationDays = collectConfig.fpiExpirationDays);
@@ -87,16 +87,16 @@ function parseLiveIntentCollectorConfig(collectConfig) {
 function parseRequestedAttributes(overrides) {
   function renameAttribute(attribute) {
     if (attribute === 'sharedId') {
-      return 'idcookie'
+      return 'idcookie';
     } else {
-      return attribute
-    }
+      return attribute;
+    };
   }
   function createParameterArray(config) {
     return Object.entries(config).flatMap(([k, v]) => (typeof v === 'boolean' && v) ? [renameAttribute(k)] : []);
   }
   if (typeof overrides === 'object') {
-    return createParameterArray({...defaultRequestedAttributes, ...overrides})
+    return createParameterArray({...defaultRequestedAttributes, ...overrides});
   } else {
     return createParameterArray(defaultRequestedAttributes);
   }
@@ -108,7 +108,7 @@ function initializeLiveConnect(configParams) {
   }
 
   configParams = configParams || {};
-  const sharedIdConfig = configParams.sharedId || {}
+  const sharedIdConfig = configParams.sharedId || {};
 
   const publisherId = configParams.publisherId || 'any';
   const identityResolutionConfig = {
@@ -127,7 +127,7 @@ function initializeLiveConnect(configParams) {
     liveConnectConfig.distributorId = configParams.distributorId;
     identityResolutionConfig.source = configParams.distributorId;
   } else {
-    identityResolutionConfig.source = configParams.partner || 'prebid'
+    identityResolutionConfig.source = configParams.partner || 'prebid';
   }
 
   liveConnectConfig.wrapperName = 'prebid';
@@ -140,11 +140,11 @@ function initializeLiveConnect(configParams) {
   liveConnectConfig.idCookie.name = sharedIdConfig.name;
   liveConnectConfig.idCookie.strategy = sharedIdConfig.strategy;
 
-  const usPrivacyString = uspDataHandler.getConsentData()
+  const usPrivacyString = uspDataHandler.getConsentData();
   if (usPrivacyString) {
     liveConnectConfig.usPrivacyString = usPrivacyString;
   }
-  const gdprConsent = gdprDataHandler.getConsentData()
+  const gdprConsent = gdprDataHandler.getConsentData();
   if (gdprConsent) {
     liveConnectConfig.gdprApplies = gdprConsent.gdprApplies;
     liveConnectConfig.gdprConsent = gdprConsent.consentString;
@@ -158,21 +158,21 @@ function initializeLiveConnect(configParams) {
   // The third param is the ajax and pixel object, the ajax and pixel use PBJS
   liveConnect = liveIntentIdSubmodule.getInitializer()(liveConnectConfig, storage, calls);
   if (configParams.emailHash) {
-    liveConnect.push({ hash: configParams.emailHash })
+    liveConnect.push({ hash: configParams.emailHash });
   }
   return liveConnect;
 }
 
 function tryFireEvent() {
   if (!eventFired && liveConnect) {
-    const eventDelay = liveConnect.config.fireEventDelay || 500
+    const eventDelay = liveConnect.config.fireEventDelay || 500;
     setTimeout(() => {
-      const instances = window.liQ_instances
-      instances.forEach(i => i.eventBus.once(EVENTS_TOPIC, setEventFiredFlag))
+      const instances = window.liQ_instances;
+      instances.forEach(i => i.eventBus.once(EVENTS_TOPIC, setEventFiredFlag));
       if (!eventFired && liveConnect) {
         liveConnect.fire();
       }
-    }, eventDelay)
+    }, eventDelay);
   }
 }
 
@@ -186,10 +186,10 @@ export const liveIntentIdSubmodule = {
   name: MODULE_NAME,
 
   setModuleMode(mode) {
-    this.moduleMode = mode
+    this.moduleMode = mode;
   },
   getInitializer() {
-    return (liveConnectConfig, storage, calls) => LiveConnect(liveConnectConfig, storage, calls, this.moduleMode)
+    return (liveConnectConfig, storage, calls) => LiveConnect(liveConnectConfig, storage, calls, this.moduleMode);
   },
 
   /**
@@ -207,58 +207,57 @@ export const liveIntentIdSubmodule = {
       const result = {};
 
       // old versions stored lipbid in unifiedId. Ensure that we can still read the data.
-      const lipbid = value.nonId || value.unifiedId
+      const lipbid = value.nonId || value.unifiedId;
       if (lipbid) {
-        const lipb = { ...value, lipbid }
-        delete lipb.unifiedId
-
-        result.lipb = lipb
+        const lipb = { ...value, lipbid };
+        delete lipb.unifiedId;
+        result.lipb = lipb;
       }
 
       // Lift usage of uid2 by exposing uid2 if we were asked to resolve it.
       // As adapters are applied in lexicographical order, we will always
       // be overwritten by the 'proper' uid2 module if it is present.
       if (value.uid2) {
-        result.uid2 = { 'id': value.uid2, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.uid2 = { 'id': value.uid2, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.bidswitch) {
-        result.bidswitch = { 'id': value.bidswitch, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.bidswitch = { 'id': value.bidswitch, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.medianet) {
-        result.medianet = { 'id': value.medianet, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.medianet = { 'id': value.medianet, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.magnite) {
-        result.magnite = { 'id': value.magnite, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.magnite = { 'id': value.magnite, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.index) {
-        result.index = { 'id': value.index, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.index = { 'id': value.index, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.openx) {
-        result.openx = { 'id': value.openx, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.openx = { 'id': value.openx, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.pubmatic) {
-        result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.sovrn) {
-        result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } }
+        result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
       if (value.idcookie) {
         if (!coppaDataHandler.getCoppa()) {
-          result.lipb = { ...result.lipb, pubcid: value.idcookie }
-          result.pubcid = { 'id': value.idcookie, ext: { provider: LI_PROVIDER_DOMAIN } }
+          result.lipb = { ...result.lipb, pubcid: value.idcookie };
+          result.pubcid = { 'id': value.idcookie, ext: { provider: LI_PROVIDER_DOMAIN } };
         }
-        delete result.lipb.idcookie
+        delete result.lipb.idcookie;
       }
 
-      return result
+      return result;
     }
 
     if (!liveConnect) {
