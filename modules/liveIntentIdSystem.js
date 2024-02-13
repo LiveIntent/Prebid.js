@@ -87,7 +87,7 @@ function parseLiveIntentCollectorConfig(collectConfig) {
 function parseRequestedAttributes(overrides) {
   function renameAttribute(attribute) {
     if (attribute === 'sharedId') {
-      return 'idcookie';
+      return 'idCookie';
     } else {
       return attribute;
     };
@@ -249,12 +249,12 @@ export const liveIntentIdSubmodule = {
         result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } };
       }
 
-      if (value.idcookie) {
+      if (value.idCookie) {
         if (!coppaDataHandler.getCoppa()) {
-          result.lipb = { ...result.lipb, pubcid: value.idcookie };
-          result.pubcid = { 'id': value.idcookie, ext: { provider: LI_PROVIDER_DOMAIN } };
+          result.lipb = { ...result.lipb, pubcid: value.idCookie };
+          result.pubcid = { 'id': value.idCookie, ext: { provider: LI_PROVIDER_DOMAIN } };
         }
-        delete result.lipb.idcookie;
+        delete result.lipb.idCookie;
       }
 
       return result;

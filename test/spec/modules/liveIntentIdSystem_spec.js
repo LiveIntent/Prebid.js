@@ -443,24 +443,46 @@ describe('LiveIntentId', function() {
     expect(callBackSpy.calledOnce).to.be.true;
   });
 
-  it('should decode a idcookie as sharedId if it exists and coppa is false', function() {
+  it('should decode a idCookie as sharedId if it exists and coppa is false', function() {
     coppaConsentDataStub.returns(false)
-    const result = liveIntentIdSubmodule.decode({nonId: 'foo', idcookie: 'bar'})
+    const result = liveIntentIdSubmodule.decode({nonId: 'foo', idCookie: 'bar'})
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubcid': 'bar'}, 'pubcid': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}})
   });
 
-  it('should not decode a idcookie as sharedId if it exists and coppa is true', function() {
+  it('should not decode a idCookie as sharedId if it exists and coppa is true', function() {
     coppaConsentDataStub.returns(true)
-    const result = liveIntentIdSubmodule.decode({nonId: 'foo', idcookie: 'bar'})
+    const result = liveIntentIdSubmodule.decode({nonId: 'foo', idCookie: 'bar'})
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo'}})
   });
 
-  it('should translate sharedId to idcookie when creating requestedAttributes', function() {
-    let callBackSpy = sinon.spy();
-    let submoduleCallback = liveIntentIdSubmodule.getId({ params:
-      { requestedAttributesOverrides: { 'sharedId': true } }
-    }).callback;
-    submoduleCallback(callBackSpy);
-    expect({'idcookie': true});
+  it('should parse sharedId to idCookie', async function() {
+    const expectedValue = 'someValue'
+    const cookieName = 'testcookie'
+    getCookieStub.withArgs(cookieName).returns(expectedValue)
+    const config = { params: {
+      ...defaultConfigParams.params,
+      sharedId: { 'strategy': 'cookie', 'name': cookieName },
+      requestedAttributesOverrides: { 'sharedId': true } }
+    }
+    const submoduleCallback = liveIntentIdSubmodule.getId(config).callback;
+    const decodedResult = new Promise(resolve => {
+      submoduleCallback((x) => resolve(liveIntentIdSubmodule.decode(x, config)));
+    });
+    const request = server.requests[0];
+    expect(request.url).to.be.eq(`https://idx.liadm.com/idex/prebid/89899?cd=.localhost&ic=someValue&resolve=nonId`);
+    request.respond(
+      200,
+      responseHeader,
+      JSON.stringify({})
+    );
+
+    const result = await decodedResult
+    expect(result).to.be.eql({
+      lipb: { 'pubcid': expectedValue },
+      pubcid: {
+        ext: { 'provider': 'liveintent.com' },
+        id: expectedValue
+      }
+    });
   });
 })
