@@ -454,4 +454,13 @@ describe('LiveIntentId', function() {
     const result = liveIntentIdSubmodule.decode({nonId: 'foo', idcookie: 'bar'})
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo'}})
   });
+
+  it('should translate sharedId to idcookie when creating requestedAttributes', function() {
+    let callBackSpy = sinon.spy();
+    let submoduleCallback = liveIntentIdSubmodule.getId({ params:
+      { requestedAttributesOverrides: { 'sharedId': true } }
+    }).callback;
+    submoduleCallback(callBackSpy);
+    expect({'idcookie': true});
+  });
 })
