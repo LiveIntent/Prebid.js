@@ -42,7 +42,7 @@ describe('LiveIntentId', function() {
     resetLiveIntentIdSubmodule();
   });
 
-  it('should initialize LiveConnect with a privacy string when getId, and include it in the resolution request', function () {
+  it('should initialize LiveConnect with a privacy string when getId but not send request', function () {
     uspConsentDataStub.returns('1YNY');
     gdprConsentDataStub.returns({
       gdprApplies: true,
@@ -455,7 +455,7 @@ describe('LiveIntentId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo'}})
   });
 
-  it('should parse sharedId to idCookie', async function() {
+  it('should parse sharedId to pubcid', async function() {
     const expectedValue = 'someValue'
     const cookieName = 'testcookie'
     getCookieStub.withArgs(cookieName).returns(expectedValue)
