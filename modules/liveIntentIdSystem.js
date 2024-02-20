@@ -138,7 +138,7 @@ function initializeLiveConnect(configParams) {
 
   liveConnectConfig.idCookie = {};
   liveConnectConfig.idCookie.name = sharedIdConfig.name;
-  liveConnectConfig.idCookie.strategy = sharedIdConfig.strategy;
+  liveConnectConfig.idCookie.strategy = sharedIdConfig.strategy == 'html5' ? 'localStorage' : sharedIdConfig.strategy;
 
   const usPrivacyString = uspDataHandler.getConsentData();
   if (usPrivacyString) {
