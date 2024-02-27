@@ -644,9 +644,9 @@ describe('User ID', function () {
     it('pbjs.getUserIdsAsEids should prioritize user ids according to config available to core', () => {
       init(config);
       setSubmoduleRegistry([
-        createMockIdSubmodule('mockId1Module', {id: {uid2: {id: 'uid2_value'}}}),
+        createMockIdSubmodule('mockId1Module', {id: {uid2: {id: 'uid2_value'}, tdid: {id: 'uid1_value'}}}),
         createMockIdSubmodule('mockId2Module', {id: {pubcid: 'pubcid_value', lipb: {lipbid: 'lipbid_value_from_mockId2Module'}}}),
-        createMockIdSubmodule('mockId3Module', {id: {uid2: {id: 'uid2_value_from_mockId3Module'}, pubcid: 'pubcid_value_from_mockId3Module', lipb: {lipbid: 'lipbid_value'}, merkleId: {id: 'merkleId_value_from_mockId3Module'}}}),
+        createMockIdSubmodule('mockId3Module', {id: {uid2: {id: 'uid2_value_from_mockId3Module'}, pubcid: 'pubcid_value_from_mockId3Module', lipb: {lipbid: 'lipbid_value'}, merkleId: {id: 'merkleId_value_from_mockId3Module'}, tdid: {id: 'uid1Id_value_from_mockId3Module'}}}),
         createMockIdSubmodule('mockId4Module', {id: {merkleId: {id: 'merkleId_value'}}})
       ]);
       config.setConfig({
@@ -667,6 +667,7 @@ describe('User ID', function () {
 
       const ids = {
         'uid2': { id: 'uid2_value_from_mockId3Module' },
+        'uid1': { id: 'uid1_value_from_mockId3Module' },
         'pubcid': 'pubcid_value',
         'lipb': { lipbid: 'lipbid_value_from_mockId2Module' },
         'merkleId': { id: 'merkleId_value' }
