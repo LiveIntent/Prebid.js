@@ -184,6 +184,20 @@ describe('eids array generation for known sub-modules', function() {
     });
   });
 
+  it('fpid; getValue call', function() {
+    const userId = {
+      lipb: {
+        idCookie: 'some-random-id-value'
+      }
+    };
+    const newEids = createEidsArray(userId);
+    expect(newEids.length).to.equal(1);
+    expect(newEids[0]).to.deep.equal({
+      source: 'fpid.liveintent.com',
+      uids: [{id: 'some-random-id-value', atype: 1}]
+    });
+  });
+
   it('bidswitch', function() {
     const userId = {
       bidswitch: {'id': 'sample_id'}
@@ -426,54 +440,6 @@ describe('eids array generation for known sub-modules', function() {
     expect(newEids[0]).to.deep.equal({
       source: 'liveintent.com',
       uids: [{id: 'some-random-id-value', atype: 3}]
-    });
-  });
-
-  it('pubcid', function() {
-    const userId = {
-      pubcid: {'id': 'sample_id'}
-    };
-    const newEids = createEidsArray(userId);
-    expect(newEids.length).to.equal(1);
-    expect(newEids[0]).to.deep.equal({
-      source: 'pubcid.org',
-      uids: [{
-        id: 'sample_id',
-        atype: 1
-      }]
-    });
-  });
-
-  it('pubcid flat', function() {
-    const userId = {
-      pubcid: 'sample_id'
-    };
-    const newEids = createEidsArray(userId);
-    expect(newEids.length).to.equal(1);
-    expect(newEids[0]).to.deep.equal({
-      source: 'pubcid.org',
-      uids: [{
-        id: 'sample_id',
-        atype: 1
-      }]
-    });
-  });
-
-  it('pubcid with ext', function() {
-    const userId = {
-      pubcid: {'id': 'sample_id', 'ext': {'provider': 'some.provider.com'}}
-    };
-    const newEids = createEidsArray(userId);
-    expect(newEids.length).to.equal(1);
-    expect(newEids[0]).to.deep.equal({
-      source: 'pubcid.org',
-      uids: [{
-        id: 'sample_id',
-        atype: 1,
-        ext: {
-          provider: 'some.provider.com'
-        }
-      }]
     });
   });
 

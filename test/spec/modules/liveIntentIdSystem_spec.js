@@ -443,26 +443,26 @@ describe('LiveIntentId', function() {
     expect(callBackSpy.calledOnce).to.be.true;
   });
 
-  it('should decode a idCookie as sharedId if it exists and coppa is false', function() {
+  it('should decode a idCookie as fpid if it exists and coppa is false', function() {
     coppaConsentDataStub.returns(false)
     const result = liveIntentIdSubmodule.decode({nonId: 'foo', idCookie: 'bar'})
-    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubcid': 'bar'}, 'pubcid': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}})
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'fpid': 'bar'}, 'fpid': {'id': 'bar'}})
   });
 
-  it('should not decode a idCookie as sharedId if it exists and coppa is true', function() {
+  it('should not decode a idCookie as fpid if it exists and coppa is true', function() {
     coppaConsentDataStub.returns(true)
     const result = liveIntentIdSubmodule.decode({nonId: 'foo', idCookie: 'bar'})
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo'}})
   });
 
-  it('should parse sharedId to pubcid', async function() {
+  it('should resolve fpid from cookie', async function() {
     const expectedValue = 'someValue'
     const cookieName = 'testcookie'
     getCookieStub.withArgs(cookieName).returns(expectedValue)
     const config = { params: {
       ...defaultConfigParams,
-      sharedId: { 'strategy': 'cookie', 'name': cookieName },
-      requestedAttributesOverrides: { 'sharedId': true } }
+      fpid: { 'strategy': 'cookie', 'name': cookieName },
+      requestedAttributesOverrides: { 'fpid': true } }
     }
     const submoduleCallback = liveIntentIdSubmodule.getId(config).callback;
     const decodedResult = new Promise(resolve => {
@@ -478,11 +478,8 @@ describe('LiveIntentId', function() {
 
     const result = await decodedResult
     expect(result).to.be.eql({
-      lipb: { 'pubcid': expectedValue },
-      pubcid: {
-        ext: { 'provider': 'liveintent.com' },
-        id: expectedValue
-      }
+      lipb: { 'fpid': expectedValue },
+      fpid: { id: expectedValue }
     });
   });
 })

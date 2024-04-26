@@ -186,7 +186,7 @@ userIdAsEids = [
     },
 
     {
-        source: 'pubcid.org',
+        source: 'fpid.liveintent.com',
         uids: [{
             id: 'some-random-id-value',
             atype: 1,

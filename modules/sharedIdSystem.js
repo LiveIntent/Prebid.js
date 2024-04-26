@@ -12,7 +12,6 @@ import {getStorageManager} from '../src/storageManager.js';
 import {VENDORLESS_GVLID} from '../src/consentHandler.js';
 import {MODULE_TYPE_UID} from '../src/activities/modules.js';
 import {domainOverrideToRootDomain} from '../libraries/domainOverrideToRootDomain/index.js';
-import {PUBCID_EIDS} from '../libraries/pubcidEids/pubcidEids.js';
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule
@@ -184,7 +183,10 @@ export const sharedIdSystemSubmodule = {
 
   domainOverride: domainOverrideToRootDomain(storage, 'sharedId'),
   eids: {
-    ...PUBCID_EIDS
+    'pubcid': {
+      source: 'pubcid.org',
+      atype: 1
+    }
   }
 };
 

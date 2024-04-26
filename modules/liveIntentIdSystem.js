@@ -12,7 +12,6 @@ import { gdprDataHandler, uspDataHandler, gppDataHandler, coppaDataHandler } fro
 import { getStorageManager } from '../src/storageManager.js';
 import { MODULE_TYPE_UID } from '../src/activities/modules.js';
 import { UID2_EIDS } from '../libraries/uid2Eids/uid2Eids.js';
-import { PUBCID_EIDS } from '../libraries/pubcidEids/pubcidEids.js';
 import {UID1_EIDS} from '../libraries/uid1Eids/uid1Eids.js';
 import { getRefererInfo } from '../src/refererDetection.js';
 
@@ -88,7 +87,7 @@ function parseLiveIntentCollectorConfig(collectConfig) {
  */
 function parseRequestedAttributes(overrides) {
   function renameAttribute(attribute) {
-    if (attribute === 'sharedId') {
+    if (attribute === 'fpid') {
       return 'idCookie';
     } else {
       return attribute;
@@ -110,7 +109,7 @@ function initializeLiveConnect(configParams) {
   }
 
   configParams = configParams || {};
-  const sharedIdConfig = configParams.sharedId || {};
+  const fpidConfig = configParams.fpid || {};
 
   const publisherId = configParams.publisherId || 'any';
   const identityResolutionConfig = {
@@ -139,8 +138,8 @@ function initializeLiveConnect(configParams) {
   liveConnectConfig.fireEventDelay = configParams.fireEventDelay;
 
   liveConnectConfig.idCookie = {};
-  liveConnectConfig.idCookie.name = sharedIdConfig.name;
-  liveConnectConfig.idCookie.strategy = sharedIdConfig.strategy == 'html5' ? 'localStorage' : sharedIdConfig.strategy;
+  liveConnectConfig.idCookie.name = fpidConfig.name;
+  liveConnectConfig.idCookie.strategy = fpidConfig.strategy == 'html5' ? 'localStorage' : fpidConfig.strategy;
 
   const usPrivacyString = uspDataHandler.getConsentData();
   if (usPrivacyString) {
@@ -253,8 +252,8 @@ export const liveIntentIdSubmodule = {
 
       if (value.idCookie) {
         if (!coppaDataHandler.getCoppa()) {
-          result.lipb = { ...result.lipb, pubcid: value.idCookie };
-          result.pubcid = { 'id': value.idCookie, ext: { provider: LI_PROVIDER_DOMAIN } };
+          result.lipb = { ...result.lipb, fpid: value.idCookie };
+          result.fpid = { 'id': value.idCookie };
         }
         delete result.lipb.idCookie;
       }
@@ -306,7 +305,6 @@ export const liveIntentIdSubmodule = {
   eids: {
     ...UID1_EIDS,
     ...UID2_EIDS,
-    ...PUBCID_EIDS,
     'lipb': {
       getValue: function(data) {
         return data.lipbid;
@@ -403,6 +401,13 @@ export const liveIntentIdSubmodule = {
         if (data.ext) {
           return data.ext;
         }
+      }
+    },
+    'fpid': {
+      source: 'fpid.liveintent.com',
+      atype: 1,
+      getValue: function(data) {
+        return data.id;
       }
     }
   }
