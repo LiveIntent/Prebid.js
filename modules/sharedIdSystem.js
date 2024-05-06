@@ -186,7 +186,7 @@ export const sharedIdSystemSubmodule = {
     'pubcid': {
       source: 'pubcid.org',
       atype: 1
-    },
+    }
   }
 };
 
