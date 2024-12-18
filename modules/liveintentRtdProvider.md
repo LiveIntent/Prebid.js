@@ -1,37 +1,27 @@
 # Overview
 
-Module Name: Adagio Rtd Provider
+Module Name: LiveIntent Provider
 Module Type: Rtd Provider
-Maintainer: dev@adagio.io
+Maintainer: product@liveintent.com
 
 # Description
 
-This module is exclusively used in combination with Adagio Bidder Adapter (SSP) and/or with Adagio prebid server endpoint, and mandatory for Adagio customers.
-It computes and collects data required to leverage Adagio viewability and attention prediction engine.
+This module extracts segments from `bidRequest.userId.lipbid.segments` enriched by the userID module and
+move them as part of the `ortb2.user.data` array entry. 
 
-Features are computed for the Adagio bidder only and placed into `ortb2.ext` and `AdUnit.ortb2Imp.ext.data`.
-
-To collect data, an external script is loaded by the provider.
-It relies on the listening of ad-server events.
-Supported ad-servers are GAM, Smart Ad Server, Xandr. Custom ad-server can also be used,
-please contact [contact@adagio.io](contact@adagio.io) for more information.
+please contact [product@liveintent.com](contact@adagio.io) for more information.
 
 # Integration
 
 ```bash
-gulp build --modules=adagioBidAdapter,rtdModule,adagioRtdProvider
+gulp build --modules=userId,liveIntentIdSystem,rtdModule,liveintentRtdProvider
 ```
 
 ```javascript
 pbjs.setConfig({
   realTimeData: {
     dataProviders:[{
-      name: 'adagio',
-      params: {
-        organizationId: '1000' // Required. Provided by Adagio
-        site: 'my-site' // Required. Provided by Adagio
-        placementSource: 'ortb' // Optional. Where to find the "placement" value. Possible values: 'ortb'<default> | 'code' | 'gpid'
-      }
+      name: 'liveintent.com'
     }]
   }
 });
