@@ -2,7 +2,6 @@
  * This module adds the liveintent provider to the Real Time Data module (rtdModule).
  */
 import { submodule } from '../src/hook.js';
-import { logMessage } from '../src/utils.js';
 
 const SUBMODULE_NAME = 'liveintent';
 const GVLID = 148;
@@ -27,14 +26,15 @@ const init = (config, userConsent) => {
 
 function onBidRequest(bidRequest, config, userConsent) {
   bidRequest.bids.forEach(bid => {
-    const userIdSegments = { segment: bid.userId.lipbid.segments.map(id => ({ id })) }
-    const liSegments = [{name: 'liveintent.com', ...userIdSegments}]
-    if (bidRequest?.ortb2?.user?.data) {
-      bidRequest.ortb2.user.data = bidRequest.ortb2.user.data.concat(liSegments)
-    } else {
-      bidRequest.ortb2 = {...bidRequest.ortb2, ...{user: {data: liSegments}}}
+    const userIdSegments = { segment: bid?.userId?.lipbid?.segments?.map(id => ({ id })) }
+    if (userIdSegments.length > 0) {
+      const liSegments = [{name: 'liveintent.com', ...userIdSegments}]
+      if (bid?.ortb2?.user?.data) {
+        bid.ortb2.user.data = bid.ortb2.user.data.concat(liSegments)
+      } else {
+        bid.ortb2 = {...bid.ortb2, ...{user: {data: liSegments}}}
+      }
     }
-    logMessage(`added the data ${JSON.stringify(bidRequest.ortb2.user.data)}`)
   })
 }
 
