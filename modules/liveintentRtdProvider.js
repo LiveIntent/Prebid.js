@@ -27,13 +27,9 @@ const init = (config, userConsent) => {
 function onBidRequest(bidRequest, config, userConsent) {
   bidRequest.bids.forEach(bid => {
     const userIdSegments = { segment: bid?.userId?.lipbid?.segments?.map(id => ({ id })) }
-    if (userIdSegments.length > 0) {
+    if (userIdSegments.segment.length > 0) {
       const liSegments = [{name: 'liveintent.com', ...userIdSegments}]
-      if (bid?.ortb2?.user?.data) {
-        bid.ortb2.user.data = bid.ortb2.user.data.concat(liSegments)
-      } else {
-        bid.ortb2 = {...bid.ortb2, ...{user: {data: liSegments}}}
-      }
+      bid.ortb2 = {...(bid?.ortb2 ?? {}), ...{user: {data: (((bid?.ortb2 ?? {})?.user ?? {})?.data ?? []).concat(liSegments)}}}
     }
   })
 }

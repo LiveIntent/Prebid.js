@@ -17,7 +17,6 @@ describe('Liveintent Rtd Provider', function () {
 
   describe('submodule `onBidRequestEvent`', function () {
     const bidReqConfig = {
-      ortb2: {},
       bidderCode: 'appnexus',
       auctionId: '8dbd7cb1-7f6d-4f84-946c-d0df4837234a',
       bidderRequestId: '2a038c6820142b',
@@ -50,14 +49,14 @@ describe('Liveintent Rtd Provider', function () {
       const bidRequest = utils.deepClone(bidReqConfig);
 
       liveintentRtdSubmodule.onBidRequestEvent(bidRequest);
-      const segments = bidRequest.ortb2.user.data;
+      const segments = bidRequest.bids[0].ortb2.user.data;
       const expectedSegments = [{name: 'liveintent.com', segment: [{id: 'asa_1231'}, {id: 'lalo_4311'}, {id: 'liurl_99123'}]}]
 
       expect(segments).to.deep.equal(expectedSegments);
     });
 
     it('extracts segments and move them to the bidRequest.ortb2.user.data withe existing data', function() {
-      bidReqConfig.ortb2 = {
+      bidReqConfig.bids[0].ortb2 = {
         user: {
           data: [
             {
@@ -73,7 +72,7 @@ describe('Liveintent Rtd Provider', function () {
       const bidRequest = utils.deepClone(bidReqConfig);
 
       liveintentRtdSubmodule.onBidRequestEvent(bidRequest);
-      const segments = bidRequest.ortb2.user.data;
+      const segments = bidRequest.bids[0].ortb2.user.data;
       const expectedSegments = [{name: 'example.com', segment: [{id: 'a_1231'}, {id: 'b_4311'}]}, {name: 'liveintent.com', segment: [{id: 'asa_1231'}, {id: 'lalo_4311'}, {id: 'liurl_99123'}]}]
       expect(segments).to.deep.equal(expectedSegments);
     });
