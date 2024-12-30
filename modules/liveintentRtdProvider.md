@@ -9,7 +9,7 @@ Maintainer: product@liveintent.com
 This module extracts segments from `bidRequest.userId.lipbid.segments` enriched by the userID module and
 inject them in `ortb2.user.data` array entry.
 
-please contact [product@liveintent.com](contact@adagio.io) for more information.
+Please visit [LiveIntent](https://www.liveintent.com/) for more information.
 
 # Testing
 
@@ -37,7 +37,8 @@ gulp build --modules=userId,liveIntentIdSystem,rtdModule,liveintentRtdProvider
 pbjs.setConfig({
   realTimeData: {
     dataProviders:[{
-      name: 'liveintent'
+      name: 'liveintent',
+      waitForIt: true
     }]
   }
 });

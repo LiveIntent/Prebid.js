@@ -33,7 +33,6 @@ function onBidRequest(bidRequest, config, userConsent) {
     }
   })
 }
-
 export const liveintentRtdSubmodule = {
   name: SUBMODULE_NAME,
   gvlid: GVLID,
