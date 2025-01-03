@@ -91,52 +91,23 @@
                 },
                 userSync: {
                     auctionDelay: 1000,
-                    idPriority : {
-                        uid2: [
-                            "liveIntentId",
-                            "uid2"
-                        ]
-                    },
                     userIds: [
                         {
                             "name": "liveIntentId",
                             "params": {
-                                "fpid": {
-                                    "strategy": "cookie",
-                                    "name": "_li_dcdm_c"
-                                },
-                                "requestedAttributesOverrides": {'uid2': true, 'medianet': true, 'bidswitch': true, 'md5': true, 'nonId': true, 'fpid': true},
                                 "liCollectConfig" : {
-                                   "distributorId" : "did-0001",
-                                   "ajaxTimeout": 2999
-                                },
-                                "emailHash": null,
-                                "ajaxTimeout": 3999
+                                   "distributorId" : "did-0000"
+                                }
                             },
                             "value" : {
                                 "lipbid":
                                 {
                                     "segments": ["asa_1231", "lalo_4311", "liurl_99123"],
-                                    "fpid": "test_fpid"
                                 }
                             }
-                        },
-                        {
-                          "name": "uid2",
-                          "value" : {
-                              "uid2": "uid2_value"
-                          }
                         }
                    ]
                 }
-            });
-            pbjs.setBidderConfig({
-               bidders: ['33across'],
-               config: {
-                  ttxSettings: {
-                    enableSRAMode: true
-                  }
-               }
             });
             pbjs.addAdUnits(adUnits);
             pbjs.requestBids({

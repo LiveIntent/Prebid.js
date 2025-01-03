@@ -1,7 +1,8 @@
 /**
- * This module adds the liveintent provider to the Real Time Data module (rtdModule).
+ * This module adds the LiveIntent provider to the Real Time Data module (rtdModule).
  */
 import { submodule } from '../src/hook.js';
+import {deepAccess, deepSetValue} from '../src/utils.js'
 
 const SUBMODULE_NAME = 'liveintent';
 const GVLID = 148;
@@ -26,18 +27,20 @@ const init = (config, userConsent) => {
 
 function onBidRequest(bidRequest, config, userConsent) {
   bidRequest.bids.forEach(bid => {
-    const userIdSegments = { segment: bid?.userId?.lipbid?.segments?.map(id => ({ id })) }
-    if (userIdSegments.segment.length > 0) {
-      const liSegments = [{name: 'liveintent.com', ...userIdSegments}]
-      bid.ortb2 = {...(bid?.ortb2 ?? {}), ...{user: {data: (((bid?.ortb2 ?? {})?.user ?? {})?.data ?? []).concat(liSegments)}}}
+    const providedSegmentsFromUserId = deepAccess(bid, 'userId.lipbid.segments', [])
+    if (providedSegmentsFromUserId.length > 0) {
+      const providedSegments = { name: 'liveintent.com', segment: providedSegmentsFromUserId.map(id => ({ id })) }
+      const existingData = deepAccess(bid, 'ortb2.user.data', [])
+      deepSetValue(bid, 'ortb2.user.data', existingData.concat(providedSegments))
     }
   })
 }
-export const liveintentRtdSubmodule = {
+
+export const liveIntentRtdSubmodule = {
   name: SUBMODULE_NAME,
   gvlid: GVLID,
   init: init,
-  onBidRequestEvent: onBidRequest,
+  onBidRequestEvent: onBidRequest
 };
 
-submodule('realTimeData', liveintentRtdSubmodule);
+submodule('realTimeData', liveIntentRtdSubmodule);
