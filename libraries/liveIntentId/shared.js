@@ -63,6 +63,8 @@ export function composeIdObject(value) {
     const lipb = { ...value, lipbid };
     delete lipb.unifiedId;
     result.lipb = lipb;
+  } else {
+    result.lipb = value
   }
 
   // Lift usage of uid2 by exposing uid2 if we were asked to resolve it.

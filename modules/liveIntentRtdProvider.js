@@ -27,7 +27,7 @@ const init = (config, userConsent) => {
 
 function onBidRequest(bidRequest, config, userConsent) {
   bidRequest.bids.forEach(bid => {
-    const providedSegmentsFromUserId = deepAccess(bid, 'userId.lipbid.segments', [])
+    const providedSegmentsFromUserId = deepAccess(bid, 'userId.lipb.segments', [])
     if (providedSegmentsFromUserId.length > 0) {
       const providedSegments = { name: 'liveintent.com', segment: providedSegmentsFromUserId.map(id => ({ id })) }
       const existingData = deepAccess(bid, 'ortb2.user.data', [])

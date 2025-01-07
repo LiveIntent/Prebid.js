@@ -24,7 +24,7 @@ describe('LiveIntent Rtd Provider', function () {
         {
         	bidder: 'appnexus',
         	userId: {
-        		lipbid: {
+        		lipb: {
         			segments: [
         				'asa_1231',
         				'lalo_4311',
