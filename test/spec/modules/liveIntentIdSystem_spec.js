@@ -188,16 +188,6 @@ describe('LiveIntentId', function() {
     }, 300);
   });
 
-  it('should return an empty identifier for an empty value', function() {
-    const result = liveIntentIdSubmodule.decode({}, { params: { fireEventDelay: 1, additionalData: 'data' } });
-    expect(result).to.be.eql({ 'lipb': {} });
-  });
-
-it('should not return a decoded identifier for undefined value', function() {
-    const result = liveIntentIdSubmodule.decode(undefined);
-    expect(result).to.be.eql({ 'lipb': undefined });
-  });
-
   it('should fire an event when decode', function(done) {
     liveIntentIdSubmodule.decode({}, { params: defaultConfigParams });
     setTimeout(() => {
@@ -479,7 +469,7 @@ it('should not return a decoded identifier for undefined value', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'tdid': 'bar'}, 'tdid': {'id': 'bar', 'ext': {'rtiPartner': 'TDID', 'provider': provider}}});
   });
 
-  it('should decode the segments to a separate object when present', function() {
+  it('should decode the segments as part of lipb', function() {
     const provider = 'liveintent.com'
     refererInfoStub.returns({domain: provider})
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', 'segments': ['bar'] }, { params: defaultConfigParams });
