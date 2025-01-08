@@ -58,46 +58,46 @@ export function composeIdObject(value) {
   const result = {};
 
   // old versions stored lipbid in unifiedId. Ensure that we can still read the data.
-  const lipbid = value.nonId || value.unifiedId
+  const lipbid = value?.nonId || value?.unifiedId
   result.lipb = lipbid ? { ...value, lipbid } : value
   delete result.lipb?.unifiedId
 
   // Lift usage of uid2 by exposing uid2 if we were asked to resolve it.
   // As adapters are applied in lexicographical order, we will always
   // be overwritten by the 'proper' uid2 module if it is present.
-  if (value.uid2) {
+  if (value?.uid2) {
     result.uid2 = { 'id': value.uid2, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.bidswitch) {
+  if (value?.bidswitch) {
     result.bidswitch = { 'id': value.bidswitch, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.medianet) {
+  if (value?.medianet) {
     result.medianet = { 'id': value.medianet, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.magnite) {
+  if (value?.magnite) {
     result.magnite = { 'id': value.magnite, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.index) {
+  if (value?.index) {
     result.index = { 'id': value.index, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.openx) {
+  if (value?.openx) {
     result.openx = { 'id': value.openx, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.pubmatic) {
+  if (value?.pubmatic) {
     result.pubmatic = { 'id': value.pubmatic, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.sovrn) {
+  if (value?.sovrn) {
     result.sovrn = { 'id': value.sovrn, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.idCookie) {
+  if (value?.idCookie) {
     if (!coppaDataHandler.getCoppa()) {
       result.lipb = { ...result.lipb, fpid: value.idCookie };
       result.fpid = { 'id': value.idCookie };
@@ -105,21 +105,21 @@ export function composeIdObject(value) {
     delete result.lipb.idCookie;
   }
 
-  if (value.thetradedesk) {
+  if (value?.thetradedesk) {
     result.lipb = {...result.lipb, tdid: value.thetradedesk}
     result.tdid = { 'id': value.thetradedesk, ext: { rtiPartner: 'TDID', provider: getRefererInfo().domain || LI_PROVIDER_DOMAIN } }
     delete result.lipb.thetradedesk
   }
 
-  if (value.sharethrough) {
+  if (value?.sharethrough) {
     result.sharethrough = { 'id': value.sharethrough, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.sonobi) {
+  if (value?.sonobi) {
     result.sonobi = { 'id': value.sonobi, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
-  if (value.vidazoo) {
+  if (value?.vidazoo) {
     result.vidazoo = { 'id': value.vidazoo, ext: { provider: LI_PROVIDER_DOMAIN } }
   }
 
