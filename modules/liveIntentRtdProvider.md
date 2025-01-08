@@ -6,7 +6,7 @@ Maintainer: product@liveIntent.com
 
 # Description
 
-This module extracts segments from `bidRequest.userId.lipbid.segments` enriched by the userID module and
+This module extracts segments from `bidRequest.userId.lipb.segments` enriched by the userID module and
 injects them in `ortb2.user.data` array entry.
 
 Please visit [LiveIntent](https://www.liveIntent.com/) for more information.
