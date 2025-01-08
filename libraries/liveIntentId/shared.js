@@ -59,8 +59,8 @@ export function composeIdObject(value) {
 
   // old versions stored lipbid in unifiedId. Ensure that we can still read the data.
   const lipbid = value.nonId || value.unifiedId
-  result.lipb = lipbid ? { ...value, lipbid, unifiedId: undefined } : value
-  delete result.lipb.unifiedId
+  result.lipb = lipbid ? { ...value, lipbid } : value
+  delete result.lipb?.unifiedId
 
   // Lift usage of uid2 by exposing uid2 if we were asked to resolve it.
   // As adapters are applied in lexicographical order, we will always
