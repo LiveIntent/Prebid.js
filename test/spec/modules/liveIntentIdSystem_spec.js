@@ -188,9 +188,9 @@ describe('LiveIntentId', function() {
     }, 300);
   });
 
-  it('should return a decoded identifier even if the unifiedId is not present in the value', function() {
-    const result = liveIntentIdSubmodule.decode({ params: { fireEventDelay: 1, additionalData: 'data' } });
-    expect(result).to.be.eql({ 'lipb': {'params': { 'fireEventDelay': 1, 'additionalData': 'data' }} });
+  it('should return an empty identifier for an empty value', function() {
+    const result = liveIntentIdSubmodule.decode({}, { params: { fireEventDelay: 1, additionalData: 'data' } });
+    expect(result).to.be.eql({ 'lipb': {} });
   });
 
 it('should not return a decoded identifier for undefined value', function() {
