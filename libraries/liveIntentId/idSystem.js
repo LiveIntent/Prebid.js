@@ -12,6 +12,7 @@ import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/val
 import { getStorageManager } from '../../src/storageManager.js';
 import { MODULE_TYPE_UID } from '../../src/activities/modules.js';
 import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend } from './shared.js'
+import { config as prebidConfig} from '../../src/config.js';
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule
@@ -43,6 +44,7 @@ const calls = {
 
 let eventFired = false;
 let liveConnect = null;
+let liModuleEnabled;
 
 /**
  * This function is used in tests.
@@ -162,6 +164,21 @@ function tryFireEvent() {
   }
 }
 
+function setUpTreatment(config) {
+  const treatmentRate = config.treatmentRate;
+  if (liModuleEnabled === undefined && treatmentRate) {
+    liModuleEnabled = Math.random() < treatmentRate
+  };
+
+  if (liModuleEnabled !== undefined) {
+    prebidConfig.setConfig({
+      "analyticsLabels": {
+        "liModuleEnabled": liModuleEnabled
+      }
+    })
+  };
+}
+
 /** @type {Submodule} */
 export const liveIntentIdSubmodule = {
   moduleMode: '$$LIVE_INTENT_MODULE_MODE$$',
@@ -191,13 +208,18 @@ export const liveIntentIdSubmodule = {
    */
   decode(value, config) {
     const configParams = (config && config.params) || {};
+    setUpTreatment(configParams);
 
     if (!liveConnect) {
       initializeLiveConnect(configParams);
     }
     tryFireEvent();
 
-    return composeIdObject(value);
+    if (liModuleEnabled === undefined || liModuleEnabled) {
+      return composeIdObject(value);
+    } else {
+      return {};
+    }
   },
 
   /**
@@ -208,6 +230,8 @@ export const liveIntentIdSubmodule = {
    */
   getId(config) {
     const configParams = (config && config.params) || {};
+    setUpTreatment(configParams);
+
     const liveConnect = initializeLiveConnect(configParams);
     if (!liveConnect) {
       return;
