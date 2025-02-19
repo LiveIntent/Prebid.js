@@ -1,8 +1,7 @@
 import { logError } from '../../src/utils.js';
 import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../../src/adapterManager.js';
 import { submodule } from '../../src/hook.js';
-import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, parseRequestedAttributes, composeIdObject, eids, GVLID, PRIMARY_IDS, makeSourceEventToSend, DEFAULT_TREATMENT_RATE } from './shared.js'
-import { config as prebidConfig } from '../../src/config.js';
+import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, parseRequestedAttributes, composeIdObject, eids, GVLID, PRIMARY_IDS, makeSourceEventToSend, setUpTreatment } from './shared.js'
 
 // Reference to the client for the liQHub.
 let cachedClientRef
@@ -129,28 +128,6 @@ function resolve(configParams, clientRef, callback) {
     onFailure,
     onSuccess
   })
-}
-
-function setUpTreatment(config) {
-  const globalEnabledFlag = window.liModuleEnabled;
-  const globalTreatmentRate = window.liTreatmentRate;
-  const holdoutGroupActive = config.activateHoldoutGroup;
-
-  // If the treatment decision has not been done yet
-  if (globalEnabledFlag === undefined) {
-    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE);
-    // Check if the treatment decision has to be done
-    if (treatmentRate) {
-      // If the treatment decision has to be done, roll the dice
-      window.liModuleEnabled = Math.random() < treatmentRate;
-      window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
-    } else {
-      // If the treatment decision does nto have to be done
-      // just make the module resolve user IDs in 100% of the cases
-      window.liModuleEnabled = true;
-      window.liTreatmentRate = 1.0;
-    }
-  };
 }
 
 /**
