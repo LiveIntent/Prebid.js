@@ -174,20 +174,14 @@ function setUpTreatment(config) {
     // Check if the treatment decision has to be done
     if (treatmentRate) {
       // If the treatment decision has to be done, roll the dice
-      liModuleEnabled = Math.random() < treatmentRate;
-      window.liModuleEnabled = liModuleEnabled;
+      window.liModuleEnabled = Math.random() < treatmentRate;
       window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
     } else {
       // If the treatment decision does nto have to be done
       // just make the module resolve user IDs in 100% of the cases
-      liModuleEnabled = true;
       window.liModuleEnabled = true;
       window.liTreatmentRate = 1.0;
     }
-  } else {
-    // In case the treatment decision has already
-    // been done, memoize it
-    liModuleEnabled = globalEnabledFlag;
   };
 }
 
@@ -227,7 +221,7 @@ export const liveIntentIdSubmodule = {
     }
     tryFireEvent();
 
-    if (liModuleEnabled) {
+    if (window.liModuleEnabled) {
       return composeIdObject(value);
     } else {
       return {};
