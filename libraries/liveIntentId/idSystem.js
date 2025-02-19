@@ -12,7 +12,6 @@ import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/val
 import { getStorageManager } from '../../src/storageManager.js';
 import { MODULE_TYPE_UID } from '../../src/activities/modules.js';
 import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend, DEFAULT_TREATMENT_RATE } from './shared.js'
-import { config as prebidConfig} from '../../src/config.js';
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule

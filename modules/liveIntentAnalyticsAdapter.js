@@ -4,8 +4,7 @@ import adapter from '../libraries/analyticsAdapter/AnalyticsAdapter.js';
 import { EVENTS } from '../src/constants.js';
 import adapterManager from '../src/adapterManager.js';
 import { getRefererInfo } from '../src/refererDetection.js';
-import { config as prebidConfig} from '../src/config.js';
-import {getGlobal} from 'src/prebidGlobal.js';
+import { config as prebidConfig } from '../src/config.js';
 import { auctionManager } from '../src/auctionManager.js';
 
 const ANALYTICS_TYPE = 'endpoint';
