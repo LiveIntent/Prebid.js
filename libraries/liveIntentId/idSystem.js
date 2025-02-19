@@ -185,7 +185,7 @@ function setUpTreatment(config) {
       window.liTreatmentRate = 1.0;
     }
   } else {
-    // In case the treatment decision has already 
+    // In case the treatment decision has already
     // been done, memoize it
     liModuleEnabled = globalEnabledFlag;
   };

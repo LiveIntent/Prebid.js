@@ -1,4 +1,4 @@
-import {ajax} from '../src/ajax.js';
+import { ajax } from '../src/ajax.js';
 import { generateUUID } from '../src/utils.js';
 import adapter from '../libraries/analyticsAdapter/AnalyticsAdapter.js';
 import { EVENTS } from '../src/constants.js';
@@ -35,7 +35,7 @@ let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
 function handleAuctionInitEvent(auctionEndEvent) {
   const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionEndEvent.bidderRequests)
 
-  // This is for old integration that enable or disable the user id module 
+  // This is for old integration that enable or disable the user id module
   // dependeing on the result of rolling the dice outside of Prebid.
   const partnerIdFromAnalyticsLabels = auctionEndEvent.analyticsLabels?.partnerId;
 
@@ -57,8 +57,8 @@ function handleAuctionInitEvent(auctionEndEvent) {
 function handleBidWonEvent(bidWonEvent) {
   const auction = auctionManager.index.getAuction({auctionId: bidWonEvent.auctionId});
   const liveIntentIdsPresent = checkLiveIntentIdsPresent(auction?.getBidRequests())
-  
-  // This is for old integration that enable or disable the user id module 
+
+  // This is for old integration that enable or disable the user id module
   // dependeing on the result of rolling the dice outside of Prebid.
   const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
 
@@ -74,7 +74,7 @@ function handleBidWonEvent(bidWonEvent) {
     bc: bidWonEvent.bidderCode, // bidder code
     pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
-    ts: bidWonEvent.requestTimestamp, // timestamp of the bid request 
+    ts: bidWonEvent.requestTimestamp, // timestamp of the bid request
     rts: bidWonEvent.responseTimestamp, // timestamp of the bid response
     tr: window.liTreatmentRate, // user id module treatment rate
     me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
@@ -85,18 +85,18 @@ function handleBidWonEvent(bidWonEvent) {
 }
 
 function encodeBoolean(value) {
-  return value === undefined ? undefined  : value ? "y" : "n"
+  return value === undefined ? undefined : value ? 'y' : 'n'
 }
 
 function checkLiveIntentIdsPresent(bidRequests) {
   const eids = bidRequests?.flatMap(r => r?.bids).flatMap(b => b?.userIdAsEids);
-  return !!eids.find(eid => eid?.source === "liveintent.com")  || !!eids.flatMap(e => e?.uids).find(u => u?.ext?.provider === "liveintent.com")
+  return !!eids.find(eid => eid?.source === 'liveintent.com') || !!eids.flatMap(e => e?.uids).find(u => u?.ext?.provider === 'liveintent.com')
 }
 
 function sendData(path, data) {
   const fields = Object.entries(data);
   if (fields.length > 0) {
-    const params = fields.map(([key, value]) => key + "=" + encodeURIComponent(value)).join('&');
+    const params = fields.map(([key, value]) => key + '=' + encodeURIComponent(value)).join('&');
     ajax(URL + '/' + path + '?' + params, undefined, null, { method: 'GET' });
   }
 }
@@ -111,7 +111,7 @@ liAnalytics.originEnableAnalytics = liAnalytics.enableAnalytics;
 // override enableAnalytics so we can get access to the config passed in from the page
 liAnalytics.enableAnalytics = function (config) {
   const userIdModuleConfig = prebidConfig.getConfig('userSync.userIds').filter(m => m.name == 'liveIntentId')?.at(0)?.params
-  partnerIdFromUserIdConfig = userIdModuleConfig?.liCollectConfig?.appId || userIdModuleConfig?.distributorId;  
+  partnerIdFromUserIdConfig = userIdModuleConfig?.liCollectConfig?.appId || userIdModuleConfig?.distributorId;
   sendAuctionInitEvents = config?.options.sendAuctionInitEvents;
   liAnalytics.originEnableAnalytics(config); // call the base class function
 };
