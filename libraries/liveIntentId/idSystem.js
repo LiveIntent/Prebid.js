@@ -43,7 +43,6 @@ const calls = {
 
 let eventFired = false;
 let liveConnect = null;
-let liModuleEnabled;
 
 /**
  * This function is used in tests.
