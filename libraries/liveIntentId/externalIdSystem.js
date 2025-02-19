@@ -2,15 +2,18 @@ import { logError } from '../../src/utils.js';
 import { gdprDataHandler, uspDataHandler, gppDataHandler } from '../../src/adapterManager.js';
 import { submodule } from '../../src/hook.js';
 import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, parseRequestedAttributes, composeIdObject, eids, GVLID, PRIMARY_IDS, makeSourceEventToSend } from './shared.js'
+import { config as prebidConfig } from '../../src/config.js';
 
 // Reference to the client for the liQHub.
 let cachedClientRef
+let liModuleEnabled
 
 /**
  * This function is used in tests.
  */
 export function resetSubmodule() {
   cachedClientRef = undefined
+  liModuleEnabled = undefined
 }
 
 window.liQHub = window.liQHub ?? []
@@ -130,6 +133,22 @@ function resolve(configParams, clientRef, callback) {
   })
 }
 
+function setUpTreatment(config) {
+  const treatmentRate = config.treatmentRate;
+  if (liModuleEnabled === undefined && treatmentRate) {
+    const random = Math.random()
+    liModuleEnabled = (random < treatmentRate)
+  };
+
+  if (liModuleEnabled !== undefined) {
+    prebidConfig.setConfig({
+      'analyticsLabels': {
+        'liModuleEnabled': liModuleEnabled
+      }
+    })
+  };
+}
+
 /**
  * @typedef {import('../../modules/userId/index.js').Submodule} Submodule
  */
@@ -149,11 +168,16 @@ export const liveIntentExternalIdSubmodule = {
    */
   decode(value, config) {
     const configParams = config?.params ?? {};
+    setUpTreatment(configParams);
 
     // Ensure client is initialized and we fired at least one collect request.
     initializeClient(configParams)
 
-    return composeIdObject(value);
+    if (liModuleEnabled === undefined || liModuleEnabled) {
+      return composeIdObject(value);
+    } else {
+      return {};
+    }
   },
 
   /**
@@ -162,6 +186,7 @@ export const liveIntentExternalIdSubmodule = {
    */
   getId(config) {
     const configParams = config?.params ?? {};
+    setUpTreatment(configParams);
 
     const clientRef = initializeClient(configParams)
 

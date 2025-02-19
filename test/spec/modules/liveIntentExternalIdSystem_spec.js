@@ -1,5 +1,7 @@
 import { liveIntentExternalIdSubmodule, resetSubmodule } from 'libraries/liveIntentId/externalIdSystem.js';
 import { gdprDataHandler, uspDataHandler, gppDataHandler, coppaDataHandler } from '../../../src/adapterManager.js';
+import { config as prebidConfig } from '../../../src/config.js';
+
 import * as refererDetection from '../../../src/refererDetection.js';
 const DEFAULT_AJAX_TIMEOUT = 5000
 const PUBLISHER_ID = '89899';
@@ -11,6 +13,7 @@ describe('LiveIntentExternalId', function() {
   let gppConsentDataStub;
   let coppaConsentDataStub;
   let refererInfoStub;
+  let randomStub;
 
   beforeEach(function() {
     uspConsentDataStub = sinon.stub(uspDataHandler, 'getConsentData');
@@ -18,6 +21,7 @@ describe('LiveIntentExternalId', function() {
     gppConsentDataStub = sinon.stub(gppDataHandler, 'getConsentData');
     coppaConsentDataStub = sinon.stub(coppaDataHandler, 'getCoppa');
     refererInfoStub = sinon.stub(refererDetection, 'getRefererInfo');
+    randomStub = sinon.stub(Math, 'random').returns(0.6);
   });
 
   afterEach(function() {
@@ -26,6 +30,7 @@ describe('LiveIntentExternalId', function() {
     gppConsentDataStub.restore();
     coppaConsentDataStub.restore();
     refererInfoStub.restore();
+    randomStub.restore();
     window.liQHub = []; // reset
     resetSubmodule();
   });
@@ -137,7 +142,7 @@ describe('LiveIntentExternalId', function() {
     })
   });
 
-  it('should have the same data after call decode when appId, disrtributorId and sourceEvent is absent', function() {
+  it('should have the same data after call decode when appId, distributorId and sourceEvent is absent', function() {
     liveIntentExternalIdSubmodule.decode({}, {
       params: {
         ...defaultConfigParams.params,
@@ -316,9 +321,34 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'segments': ['tak']}});
   });
 
+  it('should decode values with the segments when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+
+    const result = liveIntentExternalIdSubmodule.decode({segments: ['tak']}, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'segments': ['tak']}});
+  });
+
+  it('should NOT decode values with the segments when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({segments: ['tak']}, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a uid2 to a separate object when present', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', uid2: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'uid2': 'bar'}, 'uid2': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should decode a uid2 to a separate object when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', uid2: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'uid2': 'bar'}, 'uid2': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode the uid2 when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', uid2: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should decode values with uid2 but no nonId', function() {
@@ -331,9 +361,33 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'bidswitch': 'bar'}, 'bidswitch': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode a bidswitch id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', bidswitch: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'bidswitch': 'bar'}, 'bidswitch': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a bidswitch id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', bidswitch: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a medianet id to a separate object when present', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', medianet: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'medianet': 'bar'}, 'medianet': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should decode a medianet id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', medianet: 'bar' }, defaultConfigParams);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'medianet': 'bar'}, 'medianet': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a medianet id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', medianet: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should decode a sovrn id to a separate object when present', function() {
@@ -341,9 +395,33 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sovrn': 'bar'}, 'sovrn': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode a sovrn id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sovrn: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sovrn': 'bar'}, 'sovrn': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a sovrn id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sovrn: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a magnite id to a separate object when present', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', magnite: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'magnite': 'bar'}, 'magnite': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should decode a magnite id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', magnite: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'magnite': 'bar'}, 'magnite': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a magnite id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', magnite: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should decode an index id to a separate object when present', function() {
@@ -351,9 +429,33 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'index': 'bar'}, 'index': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode an index id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', index: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'index': 'bar'}, 'index': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode an index id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', index: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode an openx id to a separate object when present', function () {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', openx: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'openx': 'bar'}, 'openx': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should decode an openx id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', openx: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'openx': 'bar'}, 'openx': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode an openx id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', openx: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should decode an pubmatic id to a separate object when present', function() {
@@ -361,11 +463,39 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubmatic': 'bar'}, 'pubmatic': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode an pubmatic id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', pubmatic: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'pubmatic': 'bar'}, 'pubmatic': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode an pubmatic id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', pubmatic: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a thetradedesk id to a separate object when present', function() {
     const provider = 'liveintent.com'
     refererInfoStub.returns({domain: provider})
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'tdid': 'bar'}, 'tdid': {'id': 'bar', 'ext': {'rtiPartner': 'TDID', 'provider': provider}}});
+  });
+
+  it('should decode a thetradedesk id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const provider = 'liveintent.com'
+    refererInfoStub.returns({domain: provider})
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'tdid': 'bar'}, 'tdid': {'id': 'bar', 'ext': {'rtiPartner': 'TDID', 'provider': provider}}});
+  });
+
+  it('should NOT decode a thetradedesk id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const provider = 'liveintent.com'
+    refererInfoStub.returns({domain: provider})
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', thetradedesk: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should allow disabling nonId resolution', function() {
@@ -403,6 +533,13 @@ describe('LiveIntentExternalId', function() {
     coppaConsentDataStub.returns(false)
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', idCookie: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'fpid': 'bar'}, 'fpid': {'id': 'bar'}});
+  });
+
+  it('should not decode a idCookie as fpid even if it exists and coppa is false because of the low treatmentRate', function() {
+    coppaConsentDataStub.returns(false)
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', idCookie: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should not decode a idCookie as fpid if it exists and coppa is true', function() {
@@ -451,9 +588,33 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sharethrough': 'bar'}, 'sharethrough': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode a sharethrough id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sharethrough: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sharethrough': 'bar'}, 'sharethrough': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a sharethrough id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sharethrough: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a sonobi id to a separate object when present', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sonobi: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sonobi': 'bar'}, 'sonobi': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should decode a sonobi id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sonobi: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'sonobi': 'bar'}, 'sonobi': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a sonobi id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', sonobi: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 
   it('should decode a triplelift id to a separate object when present', function() {
@@ -461,13 +622,49 @@ describe('LiveIntentExternalId', function() {
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'triplelift': 'bar'}, 'triplelift': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode a triplelift id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', triplelift: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'triplelift': 'bar'}, 'triplelift': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a triplelift id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', triplelift: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode a vidazoo id to a separate object when present', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar' }, defaultConfigParams);
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar'}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
   });
 
+  it('should decode a vidazoo id when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar'}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
+  it('should NOT decode a vidazoo id when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar' }, configWithTreatmentRate);
+    expect(result).to.eql({});
+  });
+
   it('should decode the segments as part of lipb', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', 'segments': ['bar'] }, { params: defaultConfigParams });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'segments': ['bar']}});
+  });
+
+  it('should decode the segments when setting up a convenient treatmentRate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.9} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', 'segments': ['bar'] }, configWithTreatmentRate);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'segments': ['bar']}});
+  });
+
+  it('should NOT decode the segments when setting up a treatmentRate with a lower rate', function() {
+    const configWithTreatmentRate = { ...defaultConfigParams, params: {...defaultConfigParams.params, treatmentRate: 0.1} }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', 'segments': ['bar'] }, configWithTreatmentRate);
+    expect(result).to.eql({});
   });
 });
