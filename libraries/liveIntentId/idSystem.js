@@ -11,7 +11,7 @@ import { submodule } from '../../src/hook.js';
 import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/validate-imports
 import { getStorageManager } from '../../src/storageManager.js';
 import { MODULE_TYPE_UID } from '../../src/activities/modules.js';
-import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend, DEFAULT_TREATMENT_RATE } from './shared.js'
+import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend, setUpTreatment } from './shared.js'
 
 /**
  * @typedef {import('../modules/userId/index.js').Submodule} Submodule
@@ -160,28 +160,6 @@ function tryFireEvent() {
       }
     }, eventDelay);
   }
-}
-
-function setUpTreatment(config) {
-  const globalEnabledFlag = window.liModuleEnabled;
-  const globalTreatmentRate = window.liTreatmentRate;
-  const holdoutGroupActive = config.activateHoldoutGroup;
-
-  // If the treatment decision has not been done yet
-  if (globalEnabledFlag === undefined) {
-    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE);
-    // Check if the treatment decision has to be done
-    if (treatmentRate) {
-      // If the treatment decision has to be done, roll the dice
-      window.liModuleEnabled = Math.random() < treatmentRate;
-      window.liTreatmentRate = treatmentRate;
-    } else {
-      // If the treatment decision does nto have to be done
-      // just make the module resolve user IDs in 100% of the cases
-      window.liModuleEnabled = true;
-      window.liTreatmentRate = 1.0;
-    }
-  };
 }
 
 /** @type {Submodule} */
