@@ -174,7 +174,7 @@ function setUpTreatment(config) {
     if (treatmentRate) {
       // If the treatment decision has to be done, roll the dice
       window.liModuleEnabled = Math.random() < treatmentRate;
-      window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
+      window.liTreatmentRate = treatmentRate;
     } else {
       // If the treatment decision does nto have to be done
       // just make the module resolve user IDs in 100% of the cases
