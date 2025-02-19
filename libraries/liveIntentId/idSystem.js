@@ -174,7 +174,13 @@ function setUpTreatment(config) {
       liModuleEnabled = Math.random() < treatmentRate
       window.liModuleEnabled = liModuleEnabled;
       window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
+    } else {
+      liModuleEnabled = true;
+      window.liModuleEnabled = true;
+      window.liTreatmentRate = 1.0;
     }
+  } else {
+    liModuleEnabled = globalEnabledFlag;
   };
 }
 
@@ -214,7 +220,7 @@ export const liveIntentIdSubmodule = {
     }
     tryFireEvent();
 
-    if (liModuleEnabled === undefined || liModuleEnabled) {
+    if (liModuleEnabled) {
       return composeIdObject(value);
     } else {
       return {};

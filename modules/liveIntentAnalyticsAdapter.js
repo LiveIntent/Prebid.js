@@ -90,7 +90,7 @@ function encodeBoolean(value) {
 
 function checkLiveIntentIdsPresent(bidRequests) {
   const eids = bidRequests?.flatMap(r => r?.bids).flatMap(b => b?.userIdAsEids);
-  return !!eids.find(eid => eid?.source === "liveintent.com")  || eids.flatMap(e => e?.uids).find(u => u?.ext?.provider === "liveintent.com")
+  return !!eids.find(eid => eid?.source === "liveintent.com")  || !!eids.flatMap(e => e?.uids).find(u => u?.ext?.provider === "liveintent.com")
 }
 
 function sendData(path, data) {
