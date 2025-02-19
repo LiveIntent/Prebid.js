@@ -32,18 +32,18 @@ let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
   }
 });
 
-function handleAuctionInitEvent(auctionEndEvent) {
-  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionEndEvent.bidderRequests)
+function handleAuctionInitEvent(auctionInitEvent) {
+  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionInitEvent.bidderRequests)
 
   // This is for old integration that enable or disable the user id module
   // dependeing on the result of rolling the dice outside of Prebid.
-  const partnerIdFromAnalyticsLabels = auctionEndEvent.analyticsLabels?.partnerId;
+  const partnerIdFromAnalyticsLabels = auctionInitEvent.analyticsLabels?.partnerId;
 
   const data = {
     id: generateUUID(), // generated event id
-    aid: auctionEndEvent.auctionId, // auction id
+    aid: auctionInitEvent.auctionId, // auction id
     u: getRefererInfo().page, // page URL
-    ts: auctionEndEvent.timestamp, // timestamp of the auction
+    ts: auctionInitEvent.timestamp, // timestamp of the auction
     pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
     tr: window.liTreatmentRate, // user id module treatment rate
@@ -80,6 +80,7 @@ function handleBidWonEvent(bidWonEvent) {
     me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
     liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
   };
+
   const filteredData = ignoreUndefined(data);
   sendData('bid-won', filteredData);
 }
