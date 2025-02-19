@@ -37,7 +37,7 @@ function handleAuctionInitEvent(auctionEndEvent) {
 
   // This is for old integration that enable or disable the user id module 
   // dependeing on the result of rolling the dice outside of Prebid.
-  const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
+  const partnerIdFromAnalyticsLabels = auctionEndEvent.analyticsLabels?.partnerId;
 
   const data = {
     id: generateUUID(), // generated event id
