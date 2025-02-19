@@ -10,6 +10,7 @@ export const DEFAULT_DELAY = 500;
 export const MODULE_NAME = 'liveIntentId';
 export const LI_PROVIDER_DOMAIN = 'liveintent.com';
 export const DEFAULT_REQUESTED_ATTRIBUTES = { 'nonId': true };
+export const DEFAULT_TREATMENT_RATE = 0.97.
 
 export function parseRequestedAttributes(overrides) {
   function renameAttribute(attribute) {

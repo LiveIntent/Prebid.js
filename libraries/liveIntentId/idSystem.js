@@ -11,7 +11,7 @@ import { submodule } from '../../src/hook.js';
 import { LiveConnect } from 'live-connect-js'; // eslint-disable-line prebid/validate-imports
 import { getStorageManager } from '../../src/storageManager.js';
 import { MODULE_TYPE_UID } from '../../src/activities/modules.js';
-import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend } from './shared.js'
+import { DEFAULT_AJAX_TIMEOUT, MODULE_NAME, composeIdObject, eids, GVLID, DEFAULT_DELAY, PRIMARY_IDS, parseRequestedAttributes, makeSourceEventToSend, DEFAULT_TREATMENT_RATE } from './shared.js'
 import { config as prebidConfig} from '../../src/config.js';
 
 /**
@@ -165,17 +165,17 @@ function tryFireEvent() {
 }
 
 function setUpTreatment(config) {
-  const treatmentRate = config.treatmentRate;
-  if (liModuleEnabled === undefined && treatmentRate) {
-    liModuleEnabled = Math.random() < treatmentRate
-  };
+  const globalEnabledFlag = window.liModuleEnabled;
+  const globalTreatmentRate = window.liTreatmentRate;
+  const holdoutGroupActive = config.activateHoldoutGroup;
 
-  if (liModuleEnabled !== undefined) {
-    prebidConfig.setConfig({
-      "analyticsLabels": {
-        "liModuleEnabled": liModuleEnabled
-      }
-    })
+  if (globalEnabledFlag === undefined) {
+    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE)
+    if (treatmentRate) {
+      liModuleEnabled = Math.random() < treatmentRate
+      window.liModuleEnabled = liModuleEnabled;
+      window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
+    }
   };
 }
 

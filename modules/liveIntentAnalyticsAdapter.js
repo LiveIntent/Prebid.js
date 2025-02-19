@@ -15,9 +15,8 @@ const ADAPTER_CODE = 'liveintent';
 const { AUCTION_INIT, BID_WON } = EVENTS;
 const INTEGRATION_ID = '$$PREBID_GLOBAL$$';
 
-let partnerId;
+let partnerIdFromUserIdConfig;
 let sendAuctionInitEvents;
-let treatmentRate;
 
 let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
   track({ eventType, args }) {
@@ -37,15 +36,19 @@ let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
 function handleAuctionInitEvent(auctionEndEvent) {
   const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionEndEvent.bidderRequests)
 
+  // This is for old integration that enable or disable the user id module 
+  // dependeing on the result of rolling the dice outside of Prebid.
+  const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
+
   const data = {
     id: generateUUID(), // generated event id
     aid: auctionEndEvent.auctionId, // auction id
     u: getRefererInfo().page, // page URL
     ts: auctionEndEvent.timestamp, // timestamp of the auction
-    pid: partnerId, // partner id: distributor id or app id
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
-    tr: treatmentRate, // user id module treatment rate
-    me: encodeBoolean(auctionEndEvent.analyticsLabels?.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
+    tr: window.liTreatmentRate, // user id module treatment rate
+    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
     liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
   };
   const filteredData = ignoreUndefined(data);
@@ -55,6 +58,10 @@ function handleAuctionInitEvent(auctionEndEvent) {
 function handleBidWonEvent(bidWonEvent) {
   const auction = auctionManager.index.getAuction({auctionId: bidWonEvent.auctionId});
   const liveIntentIdsPresent = checkLiveIntentIdsPresent(auction?.getBidRequests())
+  
+  // This is for old integration that enable or disable the user id module 
+  // dependeing on the result of rolling the dice outside of Prebid.
+  const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
 
   const data = {
     id: generateUUID(), // generated event id
@@ -66,12 +73,12 @@ function handleBidWonEvent(bidWonEvent) {
     c: bidWonEvent.currency, // currency
     b: bidWonEvent.bidder, // bidder name
     bc: bidWonEvent.bidderCode, // bidder code
-    pid: partnerId, // partner id: distributor id or app id
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
     ts: bidWonEvent.requestTimestamp, // timestamp of the bid request 
     rts: bidWonEvent.responseTimestamp, // timestamp of the bid response
-    tr: treatmentRate, // user id module treatment rate
-    me: encodeBoolean(bidWonEvent.analyticsLabels?.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
+    tr: window.liTreatmentRate, // user id module treatment rate
+    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
     liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
   };
   const filteredData = ignoreUndefined(data);
@@ -105,9 +112,8 @@ liAnalytics.originEnableAnalytics = liAnalytics.enableAnalytics;
 // override enableAnalytics so we can get access to the config passed in from the page
 liAnalytics.enableAnalytics = function (config) {
   const userIdModuleConfig = prebidConfig.getConfig('userSync.userIds').filter(m => m.name == 'liveIntentId')?.at(0)?.params
-  partnerId = userIdModuleConfig?.liCollectConfig?.appId || userIdModuleConfig?.distributorId;
+  partnerIdFromUserIdConfig = userIdModuleConfig?.liCollectConfig?.appId || userIdModuleConfig?.distributorId;  
   sendAuctionInitEvents = config?.options.sendAuctionInitEvents;
-  treatmentRate = userIdModuleConfig?.treatmentRate;
   liAnalytics.originEnableAnalytics(config); // call the base class function
 };
 
