@@ -168,12 +168,19 @@ function setUpTreatment(config) {
   const globalTreatmentRate = window.liTreatmentRate;
   const holdoutGroupActive = config.activateHoldoutGroup;
 
+  // If the treatment decision has not been done yet
   if (globalEnabledFlag === undefined) {
-    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE)
+    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE);
+    // Check if the treatment decision has to be done
     if (treatmentRate) {
-      liModuleEnabled = Math.random() < treatmentRate
-      window.liModuleEnabled = liModuleEnabled;
+      // If the treatment decision has to be done, roll the dice
+      window.liModuleEnabled = Math.random() < treatmentRate;
       window.liTreatmentRate = DEFAULT_TREATMENT_RATE;
+    } else {
+      // If the treatment decision does nto have to be done
+      // just make the module resolve user IDs in 100% of the cases
+      window.liModuleEnabled = true;
+      window.liTreatmentRate = 1.0;
     }
   };
 }
@@ -214,7 +221,7 @@ export const liveIntentIdSubmodule = {
     }
     tryFireEvent();
 
-    if (liModuleEnabled === undefined || liModuleEnabled) {
+    if (window.liModuleEnabled) {
       return composeIdObject(value);
     } else {
       return {};
