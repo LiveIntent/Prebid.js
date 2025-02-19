@@ -131,6 +131,28 @@ export function composeIdObject(value) {
   return result
 }
 
+export function setUpTreatment(config) {
+  const globalEnabledFlag = window.liModuleEnabled;
+  const globalTreatmentRate = window.liTreatmentRate;
+  const holdoutGroupActive = config.activateHoldoutGroup;
+
+  // If the treatment decision has not been done yet
+  if (globalEnabledFlag === undefined) {
+    const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE);
+    // Check if the treatment decision has to be done
+    if (treatmentRate) {
+      // If the treatment decision has to be done, roll the dice
+      window.liModuleEnabled = Math.random() < treatmentRate;
+      window.liTreatmentRate = treatmentRate;
+    } else {
+      // If the treatment decision does nto have to be done
+      // just make the module resolve user IDs in 100% of the cases
+      window.liModuleEnabled = true;
+      window.liTreatmentRate = 1.0;
+    }
+  };
+}
+
 export const eids = {
   ...UID1_EIDS,
   ...UID2_EIDS,
