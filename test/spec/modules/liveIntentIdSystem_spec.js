@@ -618,8 +618,8 @@ describe('LiveIntentId', function() {
   });
 
   it('getId and decode should set the global variables correctly when setting the treatmentRate is undefined', function() {
-    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
     liveIntentIdSubmodule.getId(defaultConfigParams).callback(() => {});
+    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
     expect(window.liModuleEnabled).to.eql(true)
     expect(window.liTreatmentRate).to.eql(1)
