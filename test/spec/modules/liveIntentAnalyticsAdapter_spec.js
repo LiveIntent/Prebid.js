@@ -2,7 +2,6 @@ import liAnalytics from 'modules/liveIntentAnalyticsAdapter';
 import { expect } from 'chai';
 import { server } from 'test/mocks/xhr.js';
 import { auctionManager } from 'src/auctionManager.js';
-import {expectEvents} from '../../helpers/analytics.js';
 import { EVENTS } from 'src/constants.js';
 import { config } from 'src/config.js';
 
@@ -15,7 +14,6 @@ let clock;
 let now = new Date();
 
 let events = require('src/events');
-let auctionId = '99abbc81-c1f1-41cd-8f25-f7149244c897'
 
 const USERID_CONFIG = [
   {
@@ -32,7 +30,8 @@ const configWithSamplingAll = {
   provider: 'liveintent',
   options: {
     bidWonTimeout: 2000,
-    sampling: 1
+    sampling: 1,
+    sendAuctionInitEvents: true
   }
 }
 
@@ -40,7 +39,17 @@ const configWithSamplingNone = {
   provider: 'liveintent',
   options: {
     bidWonTimeout: 2000,
-    sampling: 0
+    sampling: 0,
+    sendAuctionInitEvents: true
+  }
+}
+
+const configWithNoAuctionInit = {
+  provider: 'liveintent',
+  options: {
+    bidWonTimeout: 2000,
+    sampling: 1,
+    sendAuctionInitEvents: false
   }
 }
 
@@ -64,12 +73,27 @@ describe('LiveIntent Analytics Adapter ', () => {
     sandbox.stub(auctionManager.index, 'getAuction').withArgs({auctionId: AUCTION_INIT_EVENT.auctionId}).returns({ getBidRequests: () => AUCTION_INIT_EVENT.bidderRequests });
 
     events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT);
-    events.emit(EVENTS.BID_WON, BID_WON_EVENT);
     expect(server.requests.length).to.equal(1);
+    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ts=1739969798557&pid=a123&iid=pbjs&liip=y')
 
-    let requestUrl = server.requests[0].url;
-    expect(requestUrl).to.equal("https://wba.liadm.com/analytic-events/bid-won?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&auc=test-div2&auid=afc6bc6a-3082-4940-b37f-d22e1b026e48&cpm=1.5&c=USD&b=appnexus&bc=appnexus&pid=a123&iid=pbjs&ts=1739971147744&rts=1739971147806&liip=y");
+    events.emit(EVENTS.BID_WON, BID_WON_EVENT);
+    expect(server.requests.length).to.equal(2);
+    expect(server.requests[1].url).to.equal('https://wba.liadm.com/analytic-events/bid-won?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&auc=test-div2&auid=afc6bc6a-3082-4940-b37f-d22e1b026e48&cpm=1.5&c=USD&b=appnexus&bc=appnexus&pid=a123&iid=pbjs&ts=1739971147744&rts=1739971147806&liip=y');
   });
+
+  it('Not send any events on auction init if disabled in settings', () => {
+    liAnalytics.enableAnalytics(configWithNoAuctionInit);
+    sandbox.stub(utils, 'generateUUID').returns(instanceId);
+    sandbox.stub(refererDetection, 'getRefererInfo').returns({page: url});
+    sandbox.stub(auctionManager.index, 'getAuction').withArgs({auctionId: AUCTION_INIT_EVENT.auctionId}).returns({ getBidRequests: () => AUCTION_INIT_EVENT.bidderRequests });
+
+    events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT);
+    expect(server.requests.length).to.equal(0);
+  });
+
+  // test with AUCTION_INIT_EVENT where optional value is empty and liip=y
+
+  // test with AUCTION_INIT_EVENT without liveintent.com url should have liip=n
 
   it('no request is computed when sampling is 0', () => {
     liAnalytics.enableAnalytics(configWithSamplingNone);
@@ -82,7 +106,6 @@ describe('LiveIntent Analytics Adapter ', () => {
 
     expect(server.requests.length).to.equal(0);
   });
-
 });
 
 // very big test data
