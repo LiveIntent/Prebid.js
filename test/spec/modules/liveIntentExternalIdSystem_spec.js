@@ -1,4 +1,5 @@
 import { liveIntentExternalIdSubmodule, resetSubmodule } from 'libraries/liveIntentId/externalIdSystem.js';
+import { DEFAULT_TREATMENT_RATE } from 'libraries/liveIntentId/shared.js';
 import { gdprDataHandler, uspDataHandler, gppDataHandler, coppaDataHandler } from '../../../src/adapterManager.js';
 import * as refererDetection from '../../../src/refererDetection.js';
 const DEFAULT_AJAX_TIMEOUT = 5000
@@ -11,6 +12,7 @@ describe('LiveIntentExternalId', function() {
   let gppConsentDataStub;
   let coppaConsentDataStub;
   let refererInfoStub;
+  let randomStub;
 
   beforeEach(function() {
     uspConsentDataStub = sinon.stub(uspDataHandler, 'getConsentData');
@@ -18,6 +20,7 @@ describe('LiveIntentExternalId', function() {
     gppConsentDataStub = sinon.stub(gppDataHandler, 'getConsentData');
     coppaConsentDataStub = sinon.stub(coppaDataHandler, 'getCoppa');
     refererInfoStub = sinon.stub(refererDetection, 'getRefererInfo');
+    randomStub = sinon.stub(Math, 'random').returns(0.6);
   });
 
   afterEach(function() {
@@ -26,7 +29,10 @@ describe('LiveIntentExternalId', function() {
     gppConsentDataStub.restore();
     coppaConsentDataStub.restore();
     refererInfoStub.restore();
+    randomStub.restore();
     window.liQHub = []; // reset
+    window.liModuleEnabled = undefined; // reset
+    window.liTreatmentRate = undefined; // reset
     resetSubmodule();
   });
 
@@ -469,5 +475,101 @@ describe('LiveIntentExternalId', function() {
   it('should decode the segments as part of lipb', function() {
     const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', 'segments': ['bar'] }, { params: defaultConfigParams });
     expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'segments': ['bar']}});
+  });
+
+  it('getId sets the global variables correctly when the treatmentRate is undefined', function() {
+    liveIntentExternalIdSubmodule.getId(defaultConfigParams).callback(() => {});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(1)
+  });
+
+  it('getId sets the global variables correctly when setting the activateHoldoutGroup parameter', function() {
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    liveIntentExternalIdSubmodule.getId(configWithActivateHoldoutGroup).callback(() => {});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
+  });
+
+  it('getId sets the global variables correctly with a treatmentRate that is different to the DEFAULT_TREATMENT_RATE', function() {
+    window.liTreatmentRate = 0.7
+    liveIntentExternalIdSubmodule.getId(defaultConfigParams).callback(() => {});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(0.7)
+  });
+
+  it('getId sets the global variables correctly when the rate is lower than the random value', function() {
+    randomStub.returns(1)
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    liveIntentExternalIdSubmodule.getId(configWithActivateHoldoutGroup).callback(() => {});
+    expect(window.liModuleEnabled).to.eql(false)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
+  });
+
+  it('should decode values when setting the treatmentRate is undefined', function() {
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(1)
+  });
+
+  it('should decode values when setting the activateHoldoutGroup parameter', function() {
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, configWithActivateHoldoutGroup);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
+  });
+
+  it('should decode values with a treatmentRate that is different to the DEFAULT_TREATMENT_RATE', function() {
+    window.liTreatmentRate = 0.7
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(0.7)
+  });
+
+  it('should NOT decode values when rolling the dice disables the module', function() {
+    randomStub.returns(1)
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, configWithActivateHoldoutGroup);
+    expect(result).to.eql({});
+    expect(window.liModuleEnabled).to.eql(false)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
+  });
+
+  it('getId and decode should set the global variables correctly when setting the treatmentRate is undefined', function() {
+    liveIntentExternalIdSubmodule.getId(defaultConfigParams).callback(() => {});
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(1)
+  });
+
+  it('getId and decode should set the global variables correctly when setting the activateHoldoutGroup parameter', function() {
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    liveIntentExternalIdSubmodule.getId(configWithActivateHoldoutGroup).callback(() => {});
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, configWithActivateHoldoutGroup);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
+  });
+
+  it('getId and decode should set the global variables correctly with a treatmentRate that is different to the DEFAULT_TREATMENT_RATE', function() {
+    window.liTreatmentRate = 0.7
+    liveIntentExternalIdSubmodule.getId(defaultConfigParams).callback(() => {});
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, { params: defaultConfigParams });
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar', 'segments': ['tak']}, 'vidazoo': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+    expect(window.liModuleEnabled).to.eql(true)
+    expect(window.liTreatmentRate).to.eql(0.7)
+  });
+
+  it('getId and decode should set the global variables correctly when the rate is lower than the random value', function() {
+    randomStub.returns(1)
+    const configWithActivateHoldoutGroup = { ...defaultConfigParams, params: { ...defaultConfigParams.params, activateHoldoutGroup: true } }
+    liveIntentExternalIdSubmodule.getId(configWithActivateHoldoutGroup).callback(() => {});
+    const result = liveIntentExternalIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar', segments: ['tak'] }, configWithActivateHoldoutGroup);
+    expect(result).to.eql({});
+    expect(window.liModuleEnabled).to.eql(false)
+    expect(window.liTreatmentRate).to.eql(DEFAULT_TREATMENT_RATE)
   });
 });
