@@ -1,134 +1,118 @@
-import {ajax} from '../src/ajax.js';
-import { generateUUID, logInfo, logWarn } from '../src/utils.js';
+import { ajax } from '../src/ajax.js';
+import { generateUUID } from '../src/utils.js';
 import adapter from '../libraries/analyticsAdapter/AnalyticsAdapter.js';
 import { EVENTS } from '../src/constants.js';
 import adapterManager from '../src/adapterManager.js';
-import { auctionManager } from '../src/auctionManager.js';
 import { getRefererInfo } from '../src/refererDetection.js';
+import { config as prebidConfig } from '../src/config.js';
+import { auctionManager } from '../src/auctionManager.js';
 
 const ANALYTICS_TYPE = 'endpoint';
 const URL = 'https://wba.liadm.com/analytic-events';
 const GVL_ID = 148;
 const ADAPTER_CODE = 'liveintent';
-const DEFAULT_BID_WON_TIMEOUT = 2000;
-const { AUCTION_END } = EVENTS;
-let bidWonTimeout;
+const { AUCTION_INIT, BID_WON } = EVENTS;
+const INTEGRATION_ID = '$$PREBID_GLOBAL$$';
 
-function handleAuctionEnd(args) {
-  setTimeout(() => {
-    const auction = auctionManager.index.getAuction({auctionId: args.auctionId});
-    const winningBids = (auction) ? auction.getWinningBids() : [];
-    const data = createAnalyticsEvent(args, winningBids);
-    sendAnalyticsEvent(data);
-  }, bidWonTimeout);
-}
-
-function getAnalyticsEventBids(bidsReceived) {
-  return bidsReceived.map(bid => {
-    return {
-      adUnitCode: bid.adUnitCode,
-      timeToRespond: bid.timeToRespond,
-      cpm: bid.cpm,
-      currency: bid.currency,
-      ttl: bid.ttl,
-      bidder: bid.bidder
-    };
-  });
-}
-
-function getBannerSizes(banner) {
-  if (banner && banner.sizes) {
-    return banner.sizes.map(size => {
-      const [width, height] = size;
-      return {w: width, h: height};
-    });
-  } else return [];
-}
-
-function getUniqueBy(arr, key) {
-  return [...new Map(arr.map(item => [item[key], item])).values()]
-}
-
-function createAnalyticsEvent(args, winningBids) {
-  let payload = {
-    instanceId: generateUUID(),
-    url: getRefererInfo().page,
-    bidsReceived: getAnalyticsEventBids(args.bidsReceived),
-    auctionStart: args.timestamp,
-    auctionEnd: args.auctionEnd,
-    adUnits: [],
-    userIds: [],
-    bidders: []
-  }
-  let allUserIds = [];
-
-  if (args.adUnits) {
-    args.adUnits.forEach(unit => {
-      if (unit.mediaTypes && unit.mediaTypes.banner) {
-        payload['adUnits'].push({
-          code: unit.code,
-          mediaType: 'banner',
-          sizes: getBannerSizes(unit.mediaTypes.banner),
-          ortb2Imp: unit.ortb2Imp
-        });
-      }
-      if (unit.bids) {
-        let userIds = unit.bids.flatMap(getAnalyticsEventUserIds);
-        allUserIds.push(...userIds);
-        let bidders = unit.bids.map(({bidder, params}) => {
-          return { bidder, params }
-        });
-
-        payload['bidders'].push(...bidders);
-      }
-    })
-    let uniqueUserIds = getUniqueBy(allUserIds, 'source');
-    payload['userIds'] = uniqueUserIds;
-  }
-  payload['winningBids'] = getAnalyticsEventBids(winningBids);
-  payload['auctionId'] = args.auctionId;
-  return payload;
-}
-
-function getAnalyticsEventUserIds(bid) {
-  if (bid && bid.userIdAsEids) {
-    return bid.userIdAsEids.map(({source, uids, ext}) => {
-      let analyticsEventUserId = {source, uids, ext};
-      return ignoreUndefined(analyticsEventUserId)
-    });
-  } else { return []; }
-}
-
-function sendAnalyticsEvent(data) {
-  ajax(URL, {
-    success: function () {
-      logInfo('LiveIntent Prebid Analytics: send data success');
-    },
-    error: function (e) {
-      logWarn('LiveIntent Prebid Analytics: send data error' + e);
-    }
-  }, JSON.stringify(data), {
-    contentType: 'application/json',
-    method: 'POST'
-  })
-}
-
-function ignoreUndefined(data) {
-  const filteredData = Object.entries(data).filter(([key, value]) => value)
-  return Object.fromEntries(filteredData)
-}
+let partnerIdFromUserIdConfig;
+let sendAuctionInitEvents;
 
 let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
   track({ eventType, args }) {
-    if (eventType == AUCTION_END && args) { handleAuctionEnd(args); }
+    switch (eventType) {
+      case AUCTION_INIT:
+        if (sendAuctionInitEvents) {
+          handleAuctionInitEvent(args);
+        }
+        break;
+      case BID_WON:
+        handleBidWonEvent(args);
+        break;
+    }
   }
 });
+
+function handleAuctionInitEvent(auctionEndEvent) {
+  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionEndEvent.bidderRequests)
+
+  // This is for old integration that enable or disable the user id module
+  // dependeing on the result of rolling the dice outside of Prebid.
+  const partnerIdFromAnalyticsLabels = auctionEndEvent.analyticsLabels?.partnerId;
+
+  const data = {
+    id: generateUUID(), // generated event id
+    aid: auctionEndEvent.auctionId, // auction id
+    u: getRefererInfo().page, // page URL
+    ts: auctionEndEvent.timestamp, // timestamp of the auction
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
+    iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
+    tr: window.liTreatmentRate, // user id module treatment rate
+    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
+    liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
+  };
+  const filteredData = ignoreUndefined(data);
+  sendData('auction-init', filteredData);
+}
+
+function handleBidWonEvent(bidWonEvent) {
+  const auction = auctionManager.index.getAuction({auctionId: bidWonEvent.auctionId});
+  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auction?.getBidRequests())
+
+  // This is for old integration that enable or disable the user id module
+  // dependeing on the result of rolling the dice outside of Prebid.
+  const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
+
+  const data = {
+    id: generateUUID(), // generated event id
+    aid: bidWonEvent.auctionId, // auction id
+    u: getRefererInfo().page, // page URL
+    auc: bidWonEvent.adUnitCode, // ad unit code
+    auid: bidWonEvent.adUnitId, // ad unit id
+    cpm: bidWonEvent.cpm, // CPM
+    c: bidWonEvent.currency, // currency
+    b: bidWonEvent.bidder, // bidder name
+    bc: bidWonEvent.bidderCode, // bidder code
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
+    iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
+    ts: bidWonEvent.requestTimestamp, // timestamp of the bid request
+    rts: bidWonEvent.responseTimestamp, // timestamp of the bid response
+    tr: window.liTreatmentRate, // user id module treatment rate
+    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
+    liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
+  };
+  const filteredData = ignoreUndefined(data);
+  sendData('bid-won', filteredData);
+}
+
+function encodeBoolean(value) {
+  return value === undefined ? undefined : value ? 'y' : 'n'
+}
+
+function checkLiveIntentIdsPresent(bidRequests) {
+  const eids = bidRequests?.flatMap(r => r?.bids).flatMap(b => b?.userIdAsEids);
+  return !!eids.find(eid => eid?.source === 'liveintent.com') || !!eids.flatMap(e => e?.uids).find(u => u?.ext?.provider === 'liveintent.com')
+}
+
+function sendData(path, data) {
+  const fields = Object.entries(data);
+  if (fields.length > 0) {
+    const params = fields.map(([key, value]) => key + '=' + encodeURIComponent(value)).join('&');
+    ajax(URL + '/' + path + '?' + params, undefined, null, { method: 'GET' });
+  }
+}
+
+function ignoreUndefined(data) {
+  const filteredData = Object.entries(data).filter(([key, value]) => value);
+  return Object.fromEntries(filteredData);
+}
 
 // save the base class function
 liAnalytics.originEnableAnalytics = liAnalytics.enableAnalytics;
 // override enableAnalytics so we can get access to the config passed in from the page
 liAnalytics.enableAnalytics = function (config) {
-  bidWonTimeout = config?.options?.bidWonTimeout ?? DEFAULT_BID_WON_TIMEOUT;
+  const userIdModuleConfig = prebidConfig.getConfig('userSync.userIds').filter(m => m.name == 'liveIntentId')?.at(0)?.params
+  partnerIdFromUserIdConfig = userIdModuleConfig?.liCollectConfig?.appId || userIdModuleConfig?.distributorId;
+  sendAuctionInitEvents = config?.options.sendAuctionInitEvents;
   liAnalytics.originEnableAnalytics(config); // call the base class function
 };
 
