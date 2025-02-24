@@ -122,7 +122,6 @@ describe('LiveIntent Analytics Adapter ', () => {
     expect(server.requests[1].url).to.equal('https://wba.liadm.com/analytic-events/bid-won?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&pid=a123&iid=pbjs&liip=y');
   });
 
-
   it('liip should be n if there is no source or provider in userIdAsEids have the value liveintent.com', () => {
     liAnalytics.enableAnalytics(configWithSamplingAll);
     sandbox.stub(utils, 'generateUUID').returns(instanceId);
