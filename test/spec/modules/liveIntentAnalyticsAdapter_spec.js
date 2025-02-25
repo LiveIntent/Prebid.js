@@ -76,7 +76,7 @@ describe('LiveIntent Analytics Adapter ', () => {
 
     events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT);
     expect(server.requests.length).to.equal(1);
-    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ts=1739969798557&pid=a123&iid=pbjs&liip=y')
+    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ats=1739969798557&pid=a123&iid=pbjs&liip=y')
 
     events.emit(EVENTS.BID_WON, BID_WON_EVENT);
     expect(server.requests.length).to.equal(2);
@@ -92,7 +92,7 @@ describe('LiveIntent Analytics Adapter ', () => {
 
     events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT);
     expect(server.requests.length).to.equal(1);
-    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ts=1739969798557&pid=a123&iid=pbjs&tr=0.95&liip=y')
+    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ats=1739969798557&pid=a123&iid=pbjs&tr=0.95&liip=y')
 
     events.emit(EVENTS.BID_WON, BID_WON_EVENT);
     expect(server.requests.length).to.equal(2);
@@ -130,7 +130,7 @@ describe('LiveIntent Analytics Adapter ', () => {
 
     events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT_NOT_LI);
     expect(server.requests.length).to.equal(1);
-    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ts=1739969798557&pid=a123&iid=pbjs&liip=n');
+    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ats=1739969798557&pid=a123&iid=pbjs&liip=n');
   });
 
   it('no request is computed when sampling is 0', () => {
