@@ -139,6 +139,7 @@ export function setUpTreatment(config) {
   // If the treatment decision has not been done yet
   if (globalEnabledFlag === undefined) {
     const treatmentRate = globalTreatmentRate || (holdoutGroupActive && DEFAULT_TREATMENT_RATE);
+
     // Check if the treatment decision has to be done
     if (treatmentRate) {
       // If the treatment decision has to be done, roll the dice
