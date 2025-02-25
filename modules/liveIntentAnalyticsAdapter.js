@@ -66,7 +66,7 @@ function handleBidWonEvent(bidWonEvent) {
     id: generateUUID(), // generated event id
     aid: bidWonEvent.auctionId, // auction id
     u: getRefererInfo().page, // page URL
-    ats: auction.timestamp, // auction timestamp
+    ats: auction?.getAuctionStart(), // auction timestamp
     auc: bidWonEvent.adUnitCode, // ad unit code
     auid: bidWonEvent.adUnitId, // ad unit id
     cpm: bidWonEvent.cpm, // CPM
