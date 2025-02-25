@@ -1,5 +1,5 @@
 import liAnalytics from 'modules/liveIntentAnalyticsAdapter';
-import { expect, util } from 'chai';
+import { expect } from 'chai';
 import { server } from 'test/mocks/xhr.js';
 import { auctionManager } from 'src/auctionManager.js';
 import { EVENTS } from 'src/constants.js';
@@ -66,9 +66,26 @@ describe('LiveIntent Analytics Adapter ', () => {
     sandbox.restore();
     clock.restore();
     window.liTreatmentRate = undefined
+    window.liModuleEnable = undefined
   });
 
   it('request is computed and sent correctly when sampling is 1', () => {
+    liAnalytics.enableAnalytics(configWithSamplingAll);
+    sandbox.stub(utils, 'generateUUID').returns(instanceId);
+    sandbox.stub(refererDetection, 'getRefererInfo').returns({page: url});
+    sandbox.stub(auctionManager.index, 'getAuction').withArgs({auctionId: AUCTION_INIT_EVENT.auctionId}).returns({ getBidRequests: () => AUCTION_INIT_EVENT.bidderRequests });
+
+    events.emit(EVENTS.AUCTION_INIT, AUCTION_INIT_EVENT);
+    expect(server.requests.length).to.equal(1);
+    expect(server.requests[0].url).to.equal('https://wba.liadm.com/analytic-events/auction-init?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&ats=1739969798557&pid=a123&iid=pbjs&liip=y')
+
+    events.emit(EVENTS.BID_WON, BID_WON_EVENT);
+    expect(server.requests.length).to.equal(2);
+    expect(server.requests[1].url).to.equal('https://wba.liadm.com/analytic-events/bid-won?id=77abbc81-c1f1-41cd-8f25-f7149244c800&aid=87b4a93d-19ae-432a-96f0-8c2d4cc1c539&u=https%3A%2F%2Fwww.test.com&auc=test-div2&auid=afc6bc6a-3082-4940-b37f-d22e1b026e48&cpm=1.5&c=USD&b=appnexus&bc=appnexus&pid=a123&iid=pbjs&ts=1739971147744&rts=1739971147806&liip=y');
+  });
+
+  it('request is computed and sent correctly when sampling is 1 and liModule is enabled', () => {
+    window.liModuleEnable = true
     liAnalytics.enableAnalytics(configWithSamplingAll);
     sandbox.stub(utils, 'generateUUID').returns(instanceId);
     sandbox.stub(refererDetection, 'getRefererInfo').returns({page: url});
