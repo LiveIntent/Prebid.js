@@ -32,18 +32,18 @@ let liAnalytics = Object.assign(adapter({URL, ANALYTICS_TYPE}), {
   }
 });
 
-function handleAuctionInitEvent(auctionEndEvent) {
-  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionEndEvent.bidderRequests)
+function handleAuctionInitEvent(auctionInitEvent) {
+  const liveIntentIdsPresent = checkLiveIntentIdsPresent(auctionInitEvent.bidderRequests)
 
   // This is for old integration that enable or disable the user id module
   // dependeing on the result of rolling the dice outside of Prebid.
-  const partnerIdFromAnalyticsLabels = auctionEndEvent.analyticsLabels?.partnerId;
+  const partnerIdFromAnalyticsLabels = auctionInitEvent.analyticsLabels?.partnerId;
 
   const data = {
     id: generateUUID(), // generated event id
-    aid: auctionEndEvent.auctionId, // auction id
+    aid: auctionInitEvent.auctionId, // auction id
     u: getRefererInfo().page, // page URL
-    ts: auctionEndEvent.timestamp, // timestamp of the auction
+    ats: auctionInitEvent.timestamp, // timestamp of the auction
     pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
     tr: window.liTreatmentRate, // user id module treatment rate
@@ -66,6 +66,7 @@ function handleBidWonEvent(bidWonEvent) {
     id: generateUUID(), // generated event id
     aid: bidWonEvent.auctionId, // auction id
     u: getRefererInfo().page, // page URL
+    ats: auction.timestamp, // auction timestamp
     auc: bidWonEvent.adUnitCode, // ad unit code
     auid: bidWonEvent.adUnitId, // ad unit id
     cpm: bidWonEvent.cpm, // CPM
@@ -74,7 +75,7 @@ function handleBidWonEvent(bidWonEvent) {
     bc: bidWonEvent.bidderCode, // bidder code
     pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
     iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
-    ts: bidWonEvent.requestTimestamp, // timestamp of the bid request
+    sts: bidWonEvent.requestTimestamp, // timestamp of the bid request
     rts: bidWonEvent.responseTimestamp, // timestamp of the bid response
     tr: window.liTreatmentRate, // user id module treatment rate
     me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
