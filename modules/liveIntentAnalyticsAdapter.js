@@ -40,15 +40,15 @@ function handleAuctionInitEvent(auctionInitEvent) {
   const partnerIdFromAnalyticsLabels = auctionInitEvent.analyticsLabels?.partnerId;
 
   const data = {
-    id: generateUUID(), // generated event id
-    aid: auctionInitEvent.auctionId, // auction id
-    u: getRefererInfo().page, // page URL
-    ats: auctionInitEvent.timestamp, // timestamp of the auction
-    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
-    iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
-    tr: window.liTreatmentRate, // user id module treatment rate
-    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
-    liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
+    id: generateUUID(),
+    aid: auctionInitEvent.auctionId,
+    u: getRefererInfo().page,
+    ats: auctionInitEvent.timestamp,
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels,
+    iid: INTEGRATION_ID,
+    tr: window.liTreatmentRate,
+    me: encodeBoolean(window.liModuleEnabled),
+    liip: encodeBoolean(liveIntentIdsPresent)
   };
   const filteredData = ignoreUndefined(data);
   sendData('auction-init', filteredData);
@@ -63,23 +63,23 @@ function handleBidWonEvent(bidWonEvent) {
   const partnerIdFromAnalyticsLabels = bidWonEvent.analyticsLabels?.partnerId;
 
   const data = {
-    id: generateUUID(), // generated event id
-    aid: bidWonEvent.auctionId, // auction id
-    u: getRefererInfo().page, // page URL
-    ats: auction?.getAuctionStart(), // auction timestamp
-    auc: bidWonEvent.adUnitCode, // ad unit code
-    auid: bidWonEvent.adUnitId, // ad unit id
-    cpm: bidWonEvent.cpm, // CPM
-    c: bidWonEvent.currency, // currency
-    b: bidWonEvent.bidder, // bidder name
-    bc: bidWonEvent.bidderCode, // bidder code
-    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels, // partner id: distributor id or app id
-    iid: INTEGRATION_ID, // integration id - e.g. the name of the prebid script's global variable
-    sts: bidWonEvent.requestTimestamp, // timestamp of the bid request
-    rts: bidWonEvent.responseTimestamp, // timestamp of the bid response
-    tr: window.liTreatmentRate, // user id module treatment rate
-    me: encodeBoolean(window.liModuleEnabled), // modbule enabled: decision that has been made according tp the configured treatment rate
-    liip: encodeBoolean(liveIntentIdsPresent) // whether or not the LiveIntent IDs are present in one of the bid requests of the auction
+    id: generateUUID(),
+    aid: bidWonEvent.auctionId,
+    u: getRefererInfo().page,
+    ats: auction?.getAuctionStart(),
+    auc: bidWonEvent.adUnitCode,
+    auid: bidWonEvent.adUnitId,
+    cpm: bidWonEvent.cpm,
+    c: bidWonEvent.currency,
+    b: bidWonEvent.bidder,
+    bc: bidWonEvent.bidderCode,
+    pid: partnerIdFromUserIdConfig || partnerIdFromAnalyticsLabels,
+    iid: INTEGRATION_ID,
+    sts: bidWonEvent.requestTimestamp,
+    rts: bidWonEvent.responseTimestamp,
+    tr: window.liTreatmentRate,
+    me: encodeBoolean(window.liModuleEnabled),
+    liip: encodeBoolean(liveIntentIdsPresent)
   };
 
   const filteredData = ignoreUndefined(data);
