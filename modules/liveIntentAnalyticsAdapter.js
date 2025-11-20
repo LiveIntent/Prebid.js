@@ -41,6 +41,21 @@ function handleAuctionInitEvent(auctionInitEvent) {
   // dependeing on the result of rolling the dice outside of Prebid.
   const partnerIdFromAnalyticsLabels = auctionInitEvent.analyticsLabels?.partnerId;
 
+  const asz = []
+
+  auctionInitEvent?.adUnits.forEach(adUnit => {
+    if (adUnit?.mediaTypes?.banner?.sizes) {
+      for (const [w, h] of adUnit.mediaTypes.banner.sizes) {
+        asz.push(w + 'x' + h);
+      }
+    }
+
+    if (adUnit?.mediaTypes?.video?.playerSize) {
+      const [w, h] = adUnit.mediaTypes.video.playerSize;
+      asz.push(w + 'x' + h);
+    }
+  })
+
   const data = {
     id: generateUUID(),
     aid: auctionInitEvent.auctionId,
@@ -51,7 +66,8 @@ function handleAuctionInitEvent(auctionInitEvent) {
     tr: window.liTreatmentRate,
     me: encodeBoolean(window.liModuleEnabled),
     liip: encodeBoolean(liveIntentIdsPresent),
-    aun: auctionInitEvent?.adUnits?.length || 0
+    aun: auctionInitEvent?.adUnits?.length || 0,
+    asz: asz.join(',')
   };
   const filteredData = ignoreUndefined(data);
   sendData('auction-init', filteredData);
@@ -82,7 +98,8 @@ function handleBidWonEvent(bidWonEvent) {
     rts: bidWonEvent.responseTimestamp,
     tr: window.liTreatmentRate,
     me: encodeBoolean(window.liModuleEnabled),
-    liip: encodeBoolean(liveIntentIdsPresent)
+    liip: encodeBoolean(liveIntentIdsPresent),
+    asz: bidWonEvent.width + 'x' + bidWonEvent.height
   };
 
   const filteredData = ignoreUndefined(data);
