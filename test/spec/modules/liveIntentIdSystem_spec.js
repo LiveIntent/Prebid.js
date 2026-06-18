@@ -540,6 +540,11 @@ describe('LiveIntentId', function() {
     expect(result).to.eql({ 'lipb': { 'lipbid': 'foo', 'nonId': 'foo', 'nexxen': 'bar' }, 'nexxen': { 'id': 'bar', 'ext': { 'provider': 'liveintent.com' } } });
   });
 
+  it('should decode a nexxen id to a separate object when present', function() {
+    const result = liveIntentIdSubmodule.decode({ nonId: 'foo', nexxen: 'bar' }, defaultConfigParams);
+    expect(result).to.eql({'lipb': {'lipbid': 'foo', 'nonId': 'foo', 'nexxen': 'bar'}, 'nexxen': {'id': 'bar', 'ext': {'provider': 'liveintent.com'}}});
+  });
+
   it('should decode a vidazoo id to a separate object when present', function() {
     const result = liveIntentIdSubmodule.decode({ nonId: 'foo', vidazoo: 'bar' }, defaultConfigParams);
     expect(result).to.eql({ 'lipb': { 'lipbid': 'foo', 'nonId': 'foo', 'vidazoo': 'bar' }, 'vidazoo': { 'id': 'bar', 'ext': { 'provider': 'liveintent.com' } } });
